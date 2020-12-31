@@ -1,0 +1,190 @@
+let is_alive = 1
+let current_room = 1
+dim buff![21]
+instr$ = @buff!
+let n = 0
+let e = 0
+let s = 0
+let w = 0
+let u = 0
+let d = 0
+
+
+data objects$[] = "key", "mouse", "hat", "knife", "string", "match"
+data object_locations[] = 1,1,1,3,3,2
+data rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft"
+data room_descriptions$[] = "", ~
+                "this is the main room of the house", ~
+                "off the main room, a little storage cupboard", ~
+                "a whole other wing", ~
+                "the dark, dusty loft";, ~
+                ;"", ~
+                ;"", ~
+                ;"", ~
+                ;"", ~
+                
+
+
+rem            rm   n   s   e   w   u   d
+
+data map$[] = "00","0","0","0","0","0","0", ~
+              "01","0","2","3","0","0","0", ~
+              "02","1","0","0","0","0","0", ~
+              "03","0","0","0","1","4","0", ~
+              "04","0","0","0","0","0","3", ~
+              "05","0","0","0","0","0","0", ~
+              "06","0","0","0","0","0","0", ~
+              "07","0","0","0","0","0","0", ~
+              "08","0","0","0","0","0","0", ~
+              "09","0","0","0","0","0","0", ~
+              "10","0","0","0","0","0","0", ~
+              "11","0","0","0","0","0","0", ~
+              "12","0","0","0","0","0","0", ~
+              "13","0","0","0","0","0","0", ~
+              "14","0","0","0","0","0","0", ~
+              "15","0","0","0","0","0","0", ~
+              "16","0","0","0","0","0","0"
+
+proc wait_key
+
+  print "{REV_ON}press a key to continue{REV_OFF}"
+  loop:
+    let key! = inkey!()
+    if key! = 0 then goto loop
+  
+endproc
+
+proc check_room_for_objects
+
+  print ""
+  print "room contents:"
+  let anything_in_here = 0
+  for i = 0 to 6
+    if \object_locations[i]=\current_room then 
+      print "{209}",\objects$[i]
+      anything_in_here = 1
+    endif
+  next i
+
+  if anything_in_here = 0 then print "this room contains no objects of note"
+  print ""
+  
+endproc
+            
+proc show_location
+
+  print "{CLEAR}"
+  print "{REV_ON}",\rooms$[\current_room],"{REV_OFF}"
+  print \room_descriptions$[\current_room]
+  
+  call check_room_for_objects
+  
+  print ""
+  print "available exits: ";
+  
+  let current_exits = \current_room * 7
+  \n = val!(\map$[current_exits+1])
+  \s = val!(\map$[current_exits+2])
+  \e = val!(\map$[current_exits+3])
+  \w = val!(\map$[current_exits+4])
+  \u = val!(\map$[current_exits+5])
+  \d = val!(\map$[current_exits+6])
+
+  if \n > 0 then print " {LIGHT_GRAY}n{LIGHT_BLUE}orth";
+  if \e > 0 then print " {LIGHT_GRAY}e{LIGHT_BLUE}ast";
+  if \s > 0 then print " {LIGHT_GRAY}s{LIGHT_BLUE}outh";
+  if \w > 0 then print " {LIGHT_GRAY}w{LIGHT_BLUE}est";
+  if \u > 0 then print " {LIGHT_GRAY}u{LIGHT_BLUE}p";
+  if \d > 0 then print " {LIGHT_GRAY}d{LIGHT_BLUE}own";
+  
+  print ""
+  
+endproc
+
+proc process_instruction
+
+  let instruction_ok = 0
+  
+  if strcmp(\instr$,"n")=0 then
+    if \n > 0 then 
+      instruction_ok = 1
+      \current_room = \n
+    else
+      instruction_ok = 0
+    endif    
+  endif
+  
+  if strcmp(\instr$,"e")=0 then
+    if \e > 0 then 
+      instruction_ok = 1
+      \current_room = \e
+    else
+      instruction_ok = 0
+    endif    
+  endif
+  
+  if strcmp(\instr$,"s")=0 then
+    if \s > 0 then 
+      instruction_ok = 1
+      \current_room = \s
+    else
+      instruction_ok = 0
+    endif    
+  endif
+  
+  if strcmp(\instr$,"w")=0 then
+    if \w > 0 then 
+      instruction_ok = 1
+      \current_room = \w
+    else
+      instruction_ok = 0
+    endif    
+  endif
+  
+  if strcmp(\instr$,"u")=0 then
+    if \u > 0 then 
+      instruction_ok = 1
+      \current_room = \u
+    else
+      instruction_ok = 0
+    endif    
+  endif
+  
+  if strcmp(\instr$,"d")=0 then
+    if \d > 0 then 
+      instruction_ok = 1
+      \current_room = \d
+    else
+      instruction_ok = 0
+    endif    
+  endif
+
+  
+  if instruction_ok = 0 then
+    print ""
+    print "{LIGHT_RED}oops, can't do that!{LIGHT_BLUE}"
+    print ""
+    call wait_key
+  endif
+  
+endproc
+
+proc get_instruction
+
+  print ""
+  print "your instruction?"
+  print ""
+  input \instr$, 20
+  print ""
+  
+ 
+endproc
+
+rem :game_loop
+
+while is_alive = 1
+  call show_location
+  call get_instruction
+  call process_instruction
+endwhile
+
