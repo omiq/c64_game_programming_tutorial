@@ -105,6 +105,57 @@ proc process_instruction
 
   let instruction_ok = 0
   
+  if strpos!(\instr$, "go ") = 0 then 
+    \instr$ = \instr$ + 3
+  endif
+
+  if strcmp(\instr$, "north") = 0 then \instr$ = "n"
+  if strcmp(\instr$, "east" ) = 0 then \instr$ = "e"
+  if strcmp(\instr$, "south") = 0 then \instr$ = "s"
+  if strcmp(\instr$, "west" ) = 0 then \instr$ = "w"
+  if strcmp(\instr$, "up"   ) = 0 then \instr$ = "u"
+  if strcmp(\instr$, "down" ) = 0 then \instr$ = "d"
+
+    
+  
+  
+  if strcmp(\instr$,"help")=0 then
+  
+      instruction_ok = 1
+      print "instructions"
+      call wait_key
+  
+  endif
+  
+  if strcmp(\instr$,"inventory")=0 then
+  
+      instruction_ok = 1
+      print ""
+      print "inventory:"
+      
+      let carrying_anything = 0
+      for i = 0 to 6
+        if \object_locations[i]=0 then 
+          print "{209}",\objects$[i]
+          carrying_anything = 1
+        endif
+      next i
+
+      if carrying_anything = 0 then print "you are carrying no objects of note"
+      print ""
+      
+      call wait_key
+  
+  endif
+  
+  if strcmp(\instr$,"quit")=0 then
+  
+      instruction_ok = 1
+      print "ok, bye!"
+      call wait_key
+    
+  endif
+  
   if strcmp(\instr$,"n")=0 then
     if \n > 0 then 
       instruction_ok = 1
@@ -166,6 +217,8 @@ proc process_instruction
     print ""
     call wait_key
   endif
+  
+  \instr$ = "                  "
   
 endproc
 
