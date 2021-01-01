@@ -1,49 +1,52 @@
-let is_alive = 1
-let current_room = 1
-dim buff![21]
-instr$ = @buff!
-let n = 0
-let e = 0
-let s = 0
-let w = 0
-let u = 0
-let d = 0
+proc initialise
+
+  let \is_alive = 1
+  let \current_room = 1
+  dim \buff![21]
+  \instr$ = @\buff!
+  let \n = 0
+  let \e = 0
+  let \s = 0
+  let \w = 0
+  let \u = 0
+  let \d = 0
 
 
-data objects$[] = "key", "mouse", "hat", "knife", "string", "match"
-data object_locations[] = 1,1,1,3,3,2
-data rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft"
-data room_descriptions$[] = "", ~
-                "this is the main room of the house", ~
-                "off the main room, a little storage cupboard", ~
-                "a whole other wing", ~
-                "the dark, dusty loft";, ~
-                ;"", ~
-                ;"", ~
-                ;"", ~
-                ;"", ~
-                
+  data \objects$[] = "key", "mouse", "hat", "knife", "string", "match"
+  data \object_locations[] = 1,1,1,3,3,2
+  data \rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft"
+  data \room_descriptions$[] = "", ~
+                  "this is the main room of the house", ~
+                  "off the main room, a little storage cupboard", ~
+                  "a whole other wing", ~
+                  "the dark, dusty loft";, ~
+                  ;"", ~
+                  ;"", ~
+                  ;"", ~
+                  ;"", ~
+                  
 
 
-rem            rm   n   s   e   w   u   d
+  rem            rm   n   s   e   w   u   d
 
-data map$[] = "00","0","0","0","0","0","0", ~
-              "01","0","2","3","0","0","0", ~
-              "02","1","0","0","0","0","0", ~
-              "03","0","0","0","1","4","0", ~
-              "04","0","0","0","0","0","3", ~
-              "05","0","0","0","0","0","0", ~
-              "06","0","0","0","0","0","0", ~
-              "07","0","0","0","0","0","0", ~
-              "08","0","0","0","0","0","0", ~
-              "09","0","0","0","0","0","0", ~
-              "10","0","0","0","0","0","0", ~
-              "11","0","0","0","0","0","0", ~
-              "12","0","0","0","0","0","0", ~
-              "13","0","0","0","0","0","0", ~
-              "14","0","0","0","0","0","0", ~
-              "15","0","0","0","0","0","0", ~
-              "16","0","0","0","0","0","0"
+  data \map$[] = "00","0","0","0","0","0","0", ~
+                "01","0","2","3","0","0","0", ~
+                "02","1","0","0","0","0","0", ~
+                "03","0","0","0","1","4","0", ~
+                "04","0","0","0","0","0","3", ~
+                "05","0","0","0","0","0","0", ~
+                "06","0","0","0","0","0","0", ~
+                "07","0","0","0","0","0","0", ~
+                "08","0","0","0","0","0","0", ~
+                "09","0","0","0","0","0","0", ~
+                "10","0","0","0","0","0","0", ~
+                "11","0","0","0","0","0","0", ~
+                "12","0","0","0","0","0","0", ~
+                "13","0","0","0","0","0","0", ~
+                "14","0","0","0","0","0","0", ~
+                "15","0","0","0","0","0","0", ~
+                "16","0","0","0","0","0","0"
+endproc
 
 proc wait_key
 
@@ -153,7 +156,7 @@ proc process_instruction
       instruction_ok = 1
       print "ok, bye!"
       call wait_key
-    
+      \is_alive = 0
   endif
   
   if strcmp(\instr$,"n")=0 then
@@ -233,11 +236,18 @@ proc get_instruction
  
 endproc
 
-rem :game_loop
 
-while is_alive = 1
-  call show_location
-  call get_instruction
-  call process_instruction
-endwhile
+rem main game_loop
+proc main
+  while 1=1
+    call initialise
+    
+    while \is_alive = 1
+      call show_location
+      call get_instruction
+      call process_instruction
+    endwhile
+  endwhile
+endproc
 
+call main
