@@ -1,3 +1,21 @@
+;;
+;;  TO DO
+;;
+;;  - doors (can be open, closed, locked, unlocked, need specific key, lead to a room, hidden?)
+;;  - use _object_
+;;  - trigger events (eg. spring traps)
+;;  - object properties (eg. can be moved/not)
+;;  - room properties (eg. light/dark)
+;;  - container objects (how to handle location? just visibility?)
+;;  - remember rooms been in?
+;;
+;;  look up array counting to avoid 1 to _6_
+
+
+
+
+
+
 proc initialise
 
   let \is_alive = 1
