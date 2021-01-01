@@ -3,16 +3,15 @@
 ;;
 ;;  - doors (can be open, closed, locked, unlocked, need specific key, lead to a room, hidden?)
 ;;  - use _object_
+;;  - EXAMINE
 ;;  - trigger events (eg. spring traps)
+;;  - on room entry events (eg. open bathroom door and all water floods out, next time floor is wet)
 ;;  - object properties (eg. can be moved/not)
 ;;  - room properties (eg. light/dark)
 ;;  - container objects (how to handle location? just visibility?)
 ;;  - remember rooms been in?
 ;;
 ;;  look up array counting to avoid 1 to _6_
-
-
-
 
 
 
@@ -29,9 +28,15 @@ proc initialise
   let \u = 0
   let \d = 0
 
-
+  const \num_objects = 7
   data \objects$[] = "key", "mouse", "hat", "knife", "string", "match"
-  data \object_locations[] = 1,1,1,3,3,2
+  
+  data \original_object_locations[] = 1,1,1,3,3,2
+  dim \object_locations[\num_objects]
+  for obj = 0 to \num_objects
+    let \object_locations[obj]=\original_object_locations[obj]
+  next obj
+  
   data \rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft"
   data \room_descriptions$[] = "", ~
                   "this is the main room of the house", ~
@@ -47,7 +52,7 @@ proc initialise
 
   rem            rm   n   s   e   w   u   d
 
-  data \map$[] = "00","0","0","0","0","0","0", ~
+  data \map$[] ="00","0","0","0","0","0","0", ~
                 "01","0","2","3","0","0","0", ~
                 "02","1","0","0","0","0","0", ~
                 "03","0","0","0","1","4","0", ~
@@ -80,7 +85,7 @@ proc check_room_for_objects
   print ""
   print "room contents:"
   let anything_in_here = 0
-  for i = 0 to 6
+  for i = 0 to \num_objects
     if \object_locations[i]=\current_room then 
       print "{209}",\objects$[i]
       anything_in_here = 1
@@ -143,7 +148,7 @@ proc process_instruction
       let first_space = strpos!(\instr$," ")+1
       \instr$=\instr$+first_space
       
-      for i = 0 to 6
+      for i = 0 to \num_objects
         if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=\current_room then 
           print "{218} got ",\objects$[i]
           print ""
@@ -160,7 +165,7 @@ proc process_instruction
       let first_space = strpos!(\instr$," ")+1
       \instr$=\instr$+first_space
       
-      for i = 0 to 6
+      for i = 0 to \num_objects
         if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then 
           print "{218} dropped ",\objects$[i]
           print ""
@@ -188,7 +193,7 @@ proc process_instruction
       print "inventory:"
       
       let carrying_anything = 0
-      for i = 0 to 6
+      for i = 0 to \num_objects
         if \object_locations[i]=0 then 
           print "{209}",\objects$[i]
           carrying_anything = 1
