@@ -119,8 +119,41 @@ proc process_instruction
   if strcmp(\instr$, "up"   ) = 0 then \instr$ = "u"
   if strcmp(\instr$, "down" ) = 0 then \instr$ = "d"
 
-    
+
+  if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then
   
+      let first_space = strpos!(\instr$," ")+1
+      \instr$=\instr$+first_space
+      
+      for i = 0 to 6
+        if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=\current_room then 
+          print "{218} got ",\objects$[i]
+          print ""
+           \object_locations[i]=0
+          instruction_ok = 1
+          call wait_key
+        endif
+      next i
+      
+  endif
+
+  if strpos!(\instr$,"drop")=0 or strpos!(\instr$,"give")=0 then
+  
+      let first_space = strpos!(\instr$," ")+1
+      \instr$=\instr$+first_space
+      
+      for i = 0 to 6
+        if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then 
+          print "{218} dropped ",\objects$[i]
+          print ""
+           \object_locations[i]=\current_room
+          instruction_ok = 1
+          call wait_key
+        endif
+      next i
+      
+  endif
+    
   
   if strcmp(\instr$,"help")=0 then
   
@@ -130,7 +163,7 @@ proc process_instruction
   
   endif
   
-  if strcmp(\instr$,"inventory")=0 then
+  if strcmp(\instr$,"inventory")=0 or strcmp(\instr$,"i")=0 then
   
       instruction_ok = 1
       print ""
