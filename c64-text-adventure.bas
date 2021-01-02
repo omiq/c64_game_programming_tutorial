@@ -22,6 +22,7 @@ proc initialise
   let \is_alive = 1
   let \current_room = 1
   let \room_has_visible_door = 0
+  let \current_key_needed = 0
   dim \buff![21]
   \instr$ = @\buff!
   let \n = 0
@@ -57,18 +58,23 @@ proc initialise
   const \fl_DOOR_is_open = 5
   ; Lower 31 specifies key IDs: 255-224
   dim \doors![255]
-
+  dim \key_to_doors![255]
+  
   let \doors![8] = 1 ; brass key needed, visible locked closed    
+  let \key_to_doors![1] = 8
+  
   let \doors![8] = unset_flag!(\doors![8],\fl_DOOR_is_hidden)
   let \doors![8] = set_flag!(\doors![8],\fl_DOOR_is_locked)  
   let \doors![8] = unset_flag!(\doors![8],\fl_DOOR_is_open)
   
   let \doors![9] = 7 ; bone key hidden and locked  
+  let \key_to_doors![7] = 9
+  
   let \doors![9] = set_flag!(\doors![9],\fl_DOOR_is_hidden)
   let \doors![9] = set_flag!(\doors![9],\fl_DOOR_is_locked)  
   let \doors![9] = unset_flag!(\doors![9],\fl_DOOR_is_open)
 
-  let \doors![10] = 0 ; no key, unlocked and open
+  let \doors![10] = 0 ; no key, unlocked and open 
   let \doors![10] = set_flag!(\doors![10],\fl_DOOR_is_hidden)
   let \doors![10] = unset_flag!(\doors![10],\fl_DOOR_is_locked)  
   let \doors![10] = set_flag!(\doors![10],\fl_DOOR_is_open)
@@ -202,6 +208,9 @@ proc process_door(door_id!, direction$, _pointer)
     
     if door_is_hidden!(door_id!) = 0 and door_is_locked!(door_id!) = 1 then
       print "there is a locked door ",direction$, " - you will need a key"
+      \current_key_needed = lshift!(\doors![door_id!],3)-7
+      ;call show_bts(\current_key_needed)
+      ;print \current_key_needed      
       poke _pointer, 0
     endif
     
@@ -324,6 +333,27 @@ proc process_instruction
   if strcmp(\instr$, "up"   ) = 0 then \instr$ = "u"
   if strcmp(\instr$, "down" ) = 0 then \instr$ = "d"
 
+  
+  
+  if strpos!(\instr$,"use")=0 then
+  
+      let first_space = strpos!(\instr$," ")+1
+      \instr$=\instr$+first_space
+      
+      for i = 0 to \num_objects
+        if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then
+          
+          if \current_key_needed = i then print \objects$[i], " will unlock the door ", \key_to_doors![i]
+          let \doors![\key_to_doors![i]] = unset_flag!(\doors![\key_to_doors![i]],\fl_DOOR_is_locked)  
+           
+          print ""
+          instruction_ok = 1
+          call wait_key
+        endif
+      next i
+      
+  endif
+  
 
   if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then
   
