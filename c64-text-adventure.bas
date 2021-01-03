@@ -18,11 +18,12 @@ include "bits.bas"
 
 
 proc initialise
+
   let \won_the_game! = 0
   let \is_alive! = 1
   let \current_room = 1
   let \room_has_visible_door = 0
-  let \current_key_needed = 0
+
   dim \buff![21]
   \instr$ = @\buff!
   let \n = 0
@@ -155,7 +156,7 @@ proc end_screen
   if \won_the_game! = 1 then
     print "yay - you won!"
   else
-    print "oop - you dead!"
+    print "oop - you failed. try again?"
   endif
   print ""
   call wait_key
@@ -224,6 +225,13 @@ proc door_infos(door!)
     
 endproc
 
+fun key_fit(door_id!)
+
+  current_key_needed = lshift!(\doors![door_id!],3)-7
+  return current_key_needed
+  
+endfun
+
 proc process_door(door_id!, direction$, _pointer)
 
    if door_is_hidden!(door_id!) = 1 then
@@ -233,15 +241,12 @@ proc process_door(door_id!, direction$, _pointer)
     endif
     
     if door_is_hidden!(door_id!) = 0 and door_is_locked!(door_id!) = 1 then
-      print "there is a locked door ",direction$, " - you will need a key"
-      \current_key_needed = lshift!(\doors![door_id!],3)-7
-      ;call show_bts(\current_key_needed)
-      ;print \current_key_needed      
+      print "{13}there is a locked door ",direction$, "{13}- you will need a key"   
       poke _pointer, 0
     endif
     
     if door_is_hidden!(door_id!) = 0 and door_is_locked!(door_id!) = 0 then
-      print "there is an open door ",direction$
+      print "{13}there is an open door ",direction$
     endif
 
 endproc
@@ -365,39 +370,65 @@ proc process_instruction
   
       let first_space = strpos!(\instr$," ")+1
       \instr$=\instr$+first_space
-      
+      let in_possession = 0
       for i = 0 to \num_objects
       
-        ; You have the object in your possession
+        ; You have the object in your possession?
         if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then
-        
-          ; Use a key ...
-          if strpos!(\instr$, " key") < 255 then
-            if \current_key_needed = i then print \objects$[i], " will unlock the door " rem, \key_to_doors![i]
-            let \doors![\key_to_doors![i]] = unset_flag!(\doors![\key_to_doors![i]],\fl_DOOR_is_locked)  
-            instruction_ok = 1
-            call wait_key
-          endif
-
-          ; Use 3d glasses
-          if strpos!(\instr$, "3d glasses") < 255 then
-            
-            let door_now_visible = 0
-            for this_direction = 1 to 6
-              let this_door = (\current_room * 7) + this_direction
-              if get_flag!(\doors![this_door],\fl_DOOR_is_hidden) = 1 then
-                let \doors![this_door] = unset_flag!(\doors![this_door],\fl_DOOR_is_hidden) 
-                door_now_visible = 1
-              endif
-            next this_direction
-            
-            if door_now_visible = 1 then print "A previously hidden door has appeared!"
-            instruction_ok = 1
-            call wait_key
-          endif        
-          
+          object_id = i
+          in_possession = 1
         endif
+        
       next i
+
+      if in_possession = 0 then  
+          print "{13}you could, if that was something you possessed"
+      else  
+      
+        ; Use a key ...
+        if strpos!(\instr$, " key") < 255 then
+        
+          let correct_key = 0
+          for r = 1 to 6
+              let door_id! = (\current_room * 7) + r
+              let current_key_needed = key_fit(door_id!)
+              ;print "room", \current_room," need: ",current_key_needed, " for door ", door_id!, " got: ", object_id
+              if current_key_needed = object_id then 
+                let correct_key = 1   
+                let \doors![door_id!] = unset_flag!(\doors![door_id!],\fl_DOOR_is_locked)
+              endif
+          next r
+
+          if correct_key = 1 then
+            print "trying", \objects$[object_id], " in door was successful"
+
+          else
+            print "{13}seems ", \objects$[object_id], " doesn't fit, try another door "
+          endif
+          
+          instruction_ok = 1
+          call wait_key
+        endif
+
+        ; Use 3d glasses
+        if strpos!(\instr$, "3d glasses") < 255 then
+          
+          let door_now_visible = 0
+          for this_direction = 1 to 6
+            let this_door = (\current_room * 7) + this_direction
+            if get_flag!(\doors![this_door],\fl_DOOR_is_hidden) = 1 then
+              let \doors![this_door] = unset_flag!(\doors![this_door],\fl_DOOR_is_hidden) 
+              door_now_visible = 1
+            endif
+          next this_direction
+          
+          if door_now_visible = 1 then print "a previously hidden door has appeared!"
+          instruction_ok = 1
+          call wait_key
+        endif        
+        
+      endif  
+
       print ""
 
   endif
@@ -471,8 +502,6 @@ proc process_instruction
 
       \won_the_game! = 0      
       instruction_ok = 1
-      print "ok, bye!"
-      call wait_key
       \is_alive! = 0
       
   endif
