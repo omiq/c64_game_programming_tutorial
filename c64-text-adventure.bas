@@ -81,7 +81,7 @@ proc initialise
 
   
   ; OBJECT DEFINITIONS
-  data \objects$[] = "","brass key", "mouse", "hat", "knife", "string", "match", "bone key"
+  data \objects$[] = "","brass key", "mouse", "3d glasses", "knife", "string", "match", "bone key"
   dim \object_properties$[\num_objects]
   
   
@@ -341,17 +341,41 @@ proc process_instruction
       \instr$=\instr$+first_space
       
       for i = 0 to \num_objects
+      
+        ; You have the object in your possession
         if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then
+        
+          ; Use a key ...
+          if strpos!(\instr$, " key") < 255 then
+            if \current_key_needed = i then print \objects$[i], " will unlock the door " rem, \key_to_doors![i]
+            let \doors![\key_to_doors![i]] = unset_flag!(\doors![\key_to_doors![i]],\fl_DOOR_is_locked)  
+            instruction_ok = 1
+            call wait_key
+          endif
+
+          ; Use 3d glasses
+          if strpos!(\instr$, "3d glasses") < 255 then
+            
+            let door_now_visible = 0
+            for this_direction = 1 to 6
+              let this_door = (\current_room * 7) + this_direction
+              if get_flag!(\doors![this_door],\fl_DOOR_is_hidden) = 1 then
+                let \doors![this_door] = unset_flag!(\doors![this_door],\fl_DOOR_is_hidden) 
+                door_now_visible = 1
+              endif
+            next this_direction
+            
+            if door_now_visible = 1 then print "A previously hidden door has appeared!"
+            instruction_ok = 1
+            call wait_key
+          endif
+
           
-          if \current_key_needed = i then print \objects$[i], " will unlock the door ", \key_to_doors![i]
-          let \doors![\key_to_doors![i]] = unset_flag!(\doors![\key_to_doors![i]],\fl_DOOR_is_locked)  
-           
-          print ""
-          instruction_ok = 1
-          call wait_key
+          
         endif
       next i
-      
+      print ""
+
   endif
   
 
