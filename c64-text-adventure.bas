@@ -18,8 +18,8 @@ include "bits.bas"
 
 
 proc initialise
-
-  let \is_alive = 1
+  let \won_the_game! = 0
+  let \is_alive! = 1
   let \current_room = 1
   let \room_has_visible_door = 0
   let \current_key_needed = 0
@@ -136,6 +136,32 @@ proc wait_key
     if key! = 0 then goto loop
   
 endproc
+
+proc start_screen
+
+  print "{CLR}";
+  print "an adventure game"
+  print "by chris garrett"
+  print ""
+  print "you're welcome!"
+  print ""
+  call wait_key
+  
+endproc
+
+proc end_screen
+
+  print "{CLR}";
+  if \won_the_game! = 1 then
+    print "yay - you won!"
+  else
+    print "oop - you dead!"
+  endif
+  print ""
+  call wait_key
+  
+endproc
+
 
 proc check_room_for_objects
 
@@ -335,7 +361,7 @@ proc process_instruction
 
   
   
-  if strpos!(\instr$,"use")=0 then
+  if strpos!(\instr$,"use")=0 or strpos!(\instr$,"wear")=0 then
   
       let first_space = strpos!(\instr$," ")+1
       \instr$=\instr$+first_space
@@ -368,9 +394,7 @@ proc process_instruction
             if door_now_visible = 1 then print "A previously hidden door has appeared!"
             instruction_ok = 1
             call wait_key
-          endif
-
-          
+          endif        
           
         endif
       next i
@@ -444,11 +468,13 @@ proc process_instruction
   endif
   
   if strcmp(\instr$,"quit")=0 then
-  
+
+      \won_the_game! = 0      
       instruction_ok = 1
       print "ok, bye!"
       call wait_key
-      \is_alive = 0
+      \is_alive! = 0
+      
   endif
   
   if strcmp(\instr$,"n")=0 then
@@ -531,15 +557,25 @@ endproc
 
 rem main game_loop
 proc main
+
   while 1=1
+  
+    call start_screen
+  
     call initialise
     
-    while \is_alive = 1
+    while \is_alive! = 1 
+    
       call show_location
       call get_instruction
       call process_instruction
+      
     endwhile
+    
+    call end_screen
+    
   endwhile
+  
 endproc
 
 call main
