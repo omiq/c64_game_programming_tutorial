@@ -18,11 +18,12 @@ include "bits.bas"
 
 
 proc initialise
-
+  let \_debug!=0
   let \won_the_game! = 0
   let \is_alive! = 1
   let \current_room = 1
   let \room_has_visible_door = 0
+  let \door_max = 10
 
   dim \buff![21]
   \instr$ = @\buff!
@@ -82,18 +83,16 @@ proc initialise
 
   
   ; OBJECT DEFINITIONS
+  ;                  0  1            2        3             4        5         6        7
   data \objects$[] = "","brass key", "mouse", "3d glasses", "knife", "string", "match", "bone key"
   dim \object_properties$[\num_objects]
-  
-  
   data \original_object_locations[] = 0,1,1,1,3,3,2,4
   dim \object_locations[\num_objects]
   for obj = 0 to \num_objects
     let \object_locations[obj]=\original_object_locations[obj]
   next obj
 
-
-  
+ 
   ; ROOM DEFINITIONS
   data \rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft", "lobby"
   data \room_descriptions$[] = "", ~
@@ -115,7 +114,7 @@ proc initialise
                 "02","-1","-0","-0","-0","-0","-0", ~
                 "03","-0","-0","-0","-1","-4","-0", ~
                 "04","-0","-0","-0","-0","-0","-3", ~
-                "05","-0","D1","-0","-0","-0","-0", ~
+                "05","-0","-1","-0","-0","-0","-0", ~
                 "06","-0","-0","-0","-0","-0","-0", ~
                 "07","-0","-0","-0","-0","-0","-0", ~
                 "08","-0","-0","-0","-0","-0","-0", ~
@@ -226,8 +225,9 @@ proc door_infos(door!)
 endproc
 
 fun key_fit(door_id!)
-
-  current_key_needed = lshift!(\doors![door_id!],3)-7
+  ; given door (9), return the ID for the key ("bone key")
+  current_key_needed = \doors![door_id!] & %00011111
+  if \_debug!=1 then print "{13}door: ",door_id!," key_fit:",current_key_needed, " door data ", \doors![door_id!]
   return current_key_needed
   
 endfun
@@ -390,20 +390,28 @@ proc process_instruction
         
           let correct_key = 0
           for r = 1 to 6
+          
+              ; the door will match the position in the table of n,s,e,w,u,d
               let door_id! = (\current_room * 7) + r
+              
+              ; find the key that is required for this door
               let current_key_needed = key_fit(door_id!)
-              ;print "room", \current_room," need: ",current_key_needed, " for door ", door_id!, " got: ", object_id
-              if current_key_needed = object_id then 
+              
+              if \_debug!=1 then print "room: ", \current_room," need: ",current_key_needed, " for door ", door_id!, " got: ", object_id  
+              
+              ; well we have a match but can we SEE the door?
+              if current_key_needed = object_id and get_flag!(\doors![door_id!],\fl_DOOR_is_hidden)=0 then 
                 let correct_key = 1   
                 let \doors![door_id!] = unset_flag!(\doors![door_id!],\fl_DOOR_is_locked)
               endif
           next r
 
           if correct_key = 1 then
-            print "trying", \objects$[object_id], " in door was successful"
+            print "trying ", \objects$[object_id], " in door was successful"
 
           else
-            print "{13}seems ", \objects$[object_id], " doesn't fit, try another door "
+            print "{13}seems ", \objects$[object_id], " doesn't fit,{13}try another door "
+
           endif
           
           instruction_ok = 1

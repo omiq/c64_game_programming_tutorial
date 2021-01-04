@@ -1,31 +1,19 @@
 fun get_flag!(fl!, fpos!)
 
-  if fpos! > 0 then
-    return rshift!(fl!, fpos!) & 1
-  else
-    return fl! & 1
-  endif
-    
+  return rshift!(fl!, fpos!) & 1
+   
 endfun
 
 
 fun flip_flag!(fl!, fpos!)
 
-  if fpos! > 0 then
-    return fl! ^ lshift!(1, fpos!)
-  else
-    return fl! ^ 1
-  endif
+  return fl! ^ lshift!(1, fpos!)
 
 endfun
 
 fun set_flag!(fl!, fpos!)
 
-  if fpos! > 0 then
-    return fl! | lshift!(1, fpos!)
-  else
-    return fl! | 1
-  endif
+  return fl! | lshift!(1, fpos!)
 
 endfun
 
