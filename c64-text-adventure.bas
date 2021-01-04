@@ -38,21 +38,7 @@ proc initialise
   const \num_objects = 8
   const \num_rooms = 10
   
-  
-  ; OBJECT FLAG BIT POSITIONS
-  const \fl_OBJECT_is_hidden = 0
-  const \fl_OBJECT_gives_light = 1
-  const \fl_OBJECT_is_key = 2
-  const \fl_OBJECT_is_container = 3
-  const \fl_OBJECT_is_moveable = 4
-  const \fl_OBJECT_is_weapon = 5
-  const \fl_OBJECT_is_consumable = 6
-  const \fl_OBJECT_is_used = 7
 
-  ; ROOM FLAG BIT POSITIONS
-  const \fl_ROOM_is_hidden = 0
-  const \fl_ROOM_is_lit = 1
-  const \fl_ROOM_been_visited = 2
   
   ; DOOR FLAG BIT POSITIONS
   const \fl_DOOR_is_hidden = 7
@@ -85,8 +71,20 @@ proc initialise
   ; OBJECT DEFINITIONS
   ;                  0  1            2        3             4        5         6        7
   data \objects$[] = "","brass key", "mouse", "3d glasses", "knife", "string", "match", "bone key"
-  dim \object_properties$[\num_objects]
-  data \original_object_locations[] = 0,1,1,1,3,3,2,4
+  
+  ; OBJECT FLAG BIT POSITIONS
+  const \fl_OBJECT_is_used = 7
+  const \fl_OBJECT_is_consumable = 6
+  const \fl_OBJECT_is_weapon = 5
+  const \fl_OBJECT_is_moveable = 4
+  const \fl_OBJECT_is_container = 3
+  const \fl_OBJECT_is_key = 2
+  const \fl_OBJECT_gives_light = 1
+  const \fl_OBJECT_is_hidden = 0
+  
+  data \object_properties![] = 0,%00010100,0,0,0,0,%01010010,%00010100
+  
+  data \original_object_locations[] = 0,1,5,1,3,3,2,1
   dim \object_locations[\num_objects]
   for obj = 0 to \num_objects
     let \object_locations[obj]=\original_object_locations[obj]
@@ -95,11 +93,19 @@ proc initialise
  
   ; ROOM DEFINITIONS
   data \rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft", "lobby"
+  
+    ; ROOM FLAG BIT POSITIONS
+  const \fl_ROOM_is_hidden = 0
+  const \fl_ROOM_is_dark = 1
+  const \fl_ROOM_been_visited = 2
+  
+  data \room_properties![]=0,0,0,0,0,%00000010,0,0,0,0,0
+  
   data \room_descriptions$[] = "", ~
                   "this is the main room of the house", ~
-                  "off the main room, a little storage cupboard", ~
+                  "off the main room,{13}a little storage cupboard", ~
                   "a whole other wing", ~
-                  "the dark, dusty loft", ~
+                  "the smelly, dusty loft", ~
                   "grand entrance";, ~
                   ;"", ~
                   ;"", ~
@@ -166,16 +172,20 @@ endproc
 proc check_room_for_objects
 
   print ""
-  print "room contents:"
-  let anything_in_here = 0
-  for i = 0 to \num_objects
-    if \object_locations[i]=\current_room then 
-      print "{209}",\objects$[i]
-      anything_in_here = 1
-    endif
-  next i
+  if get_flag!(\room_properties![\current_room],\fl_ROOM_is_dark) = 0 then
+    print "room contents:"
+    let anything_in_here = 0
+    for i = 0 to \num_objects
+      if \object_locations[i]=\current_room then 
+        print "{209}",\objects$[i]
+        anything_in_here = 1
+      endif
+    next i
 
-  if anything_in_here = 0 then print "this room contains no objects of note"
+    if anything_in_here = 0 then print "this room contains no objects of note"
+  else
+      print "the room is dark.{13}you can't see if there are objects."
+  endif
   print ""
   
 endproc
@@ -373,7 +383,7 @@ proc process_instruction
       let in_possession = 0
       for i = 0 to \num_objects
       
-        ; You have the object in your possession?
+        ; Do you have the object in your possession?
         if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then
           object_id = i
           in_possession = 1
@@ -381,6 +391,7 @@ proc process_instruction
         
       next i
 
+      ; you have it in your possession
       if in_possession = 0 then  
           print "{13}you could, if that was something you possessed"
       else  
@@ -435,29 +446,53 @@ proc process_instruction
           call wait_key
         endif        
         
+      
+        ; Use lighting device
+        if get_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)=1 then 
+          print "{13}the ", \objects$[object_id], " lights up the room"
+          let \room_properties![\current_room] = unset_flag!(\room_properties![\current_room],\fl_ROOM_is_dark)
+          
+          ; matches get one use only! this means you still possess it but it doesn't give off light
+          if get_flag!(\object_properties![object_id],\fl_OBJECT_is_consumable)=1 then let \object_properties![object_id] = unset_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)
+          
+          ; done
+          instruction_ok = 1
+          call wait_key
+        endif
+      
+      ; end of in-possession 
       endif  
 
       print ""
 
   endif
   
-
-  if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then
+  let is_get_command=0
   
-      let first_space = strpos!(\instr$," ")+1
-      \instr$=\instr$+first_space
-      
-      for i = 0 to \num_objects
-        if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=\current_room then 
-          print "{218} got ",\objects$[i]
-          print ""
-           \object_locations[i]=0
-          instruction_ok = 1
-          call wait_key
-        endif
-      next i
-      
+  ; things you can only do if there is light
+  if get_flag!(\room_properties![\current_room],\fl_ROOM_is_dark) = 0 then 
+
+      if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then 
+    
+        let first_space = strpos!(\instr$," ")+1
+        \instr$=\instr$+first_space
+        
+        for i = 0 to \num_objects
+          if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=\current_room then 
+            print "{218} got ",\objects$[i]
+            print ""
+             \object_locations[i]=0
+            instruction_ok = 1
+            call wait_key
+          endif
+        next i
+        
+    endif
+        
   endif
+
+  
+
 
   if strpos!(\instr$,"drop")=0 or strpos!(\instr$,"give")=0 then
   
