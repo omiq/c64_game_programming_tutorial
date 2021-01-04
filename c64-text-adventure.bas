@@ -3,18 +3,14 @@ include "bits.bas"
 ;;
 ;;  TO DO
 ;;
-;;  - doors (can be open, closed, locked, unlocked, need specific key, lead to a room, hidden?)
-;;  - use _object_
+;;  
 ;;  - EXAMINE
 ;;  - trigger events (eg. spring traps)
 ;;  - on room entry events (eg. open bathroom door and all water floods out, next time floor is wet)
-;;  - object properties (eg. can be moved/not)
-;;  - room properties (eg. light/dark)
 ;;  - container objects (how to handle location? just visibility?)
 ;;  - remember rooms been in?
-;;
-;;  look up array counting to avoid 1 to _6_
-
+;;  - reset after temporary change
+;;  
 
 
 proc initialise
@@ -99,6 +95,7 @@ proc initialise
   const \fl_ROOM_is_dark = 1
   const \fl_ROOM_been_visited = 2
   
+  data \room_original_properties![]=0,0,0,0,0,%00000010,0,0,0,0,0
   data \room_properties![]=0,0,0,0,0,%00000010,0,0,0,0,0
   
   data \room_descriptions$[] = "", ~
