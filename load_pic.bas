@@ -1,17 +1,10 @@
-; Waits for keypress
-proc wait_key
-    print "{REV_ON}press a key to continue{REV_OFF}"
-loop:
-  let key! = inkey!()
-  if key! = 0 then goto loop
 
-endproc  
   
 ; load defaults (but doesn't seem to work')
-let DEF_A = peek!($d011) 
-let DEF_B = peek!($d016) 
-let DEF_C = peek!($dd00)
-let DEF_D = peek!($d018)
+let DEF_A = 27
+let DEF_B = 200 
+let DEF_C = 151
+let DEF_D = 21
 
 ; switch to bitmap mode 
 rem -- Configure VIC to bank 0,
@@ -44,17 +37,32 @@ memcpy $7f40, $0400, 1000
 rem -- Copy colors
 memcpy $8328, $d800, 1000
 
+; Waits for keypress
+proc wait_key
+    ;print "{REV_ON}press a key to continue{REV_OFF}"
+loop:
+  let key! = inkey!()
+  if key! = 0 then goto loop
+
+endproc  
+
 call wait_key
 
 rem -- reset the screen
-poke $d011, DEF_A
-poke $d016, DEF_B
-poke $dd00, DEF_C
-poke $d018, DEF_D
+sys $FF81 : rem Initialize VIC, restore default input/output to keyboard/screen, clear screen, set PAL/NTSC switch and interrupt timer
 
-print "{CLEAR}{DARK_GRAY}Done"
+poke $0286,1    ;text
+poke $D020 ,14  ;border
+poke $D021,14 ;changes the background color.
+sys $E544
+
+for i! = 0 to 255
+  let _ths! = i!
+  poke 1024+i!, _ths!
+next i!
 call wait_key
 end
+
 
 
 

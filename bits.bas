@@ -30,8 +30,8 @@ endfun
 proc show_bts(fl!)
 
   for i = 7 to 0 step -1
-  
-    print get_flag!(fl!, i);
+    let ci! = cast!(i)
+    print get_flag!(fl!, ci!);
     
   next i
   print ""

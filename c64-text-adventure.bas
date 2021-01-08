@@ -67,6 +67,16 @@ proc initialise
   ; OBJECT DEFINITIONS
   ;                  0  1            2        3             4        5         6        7
   data \objects$[] = "","brass key", "mouse", "3d glasses", "knife", "string", "match", "bone key"
+  data \object_descriptions$[] = "", ~
+  "it's a key. made out of brass.", ~
+  "a small, off-white coloured mouse. he says 'get off me you oaf!'", ~
+  "a pair of red-blue 3d glasses of the kind given out in old cinemas", ~
+  "a pocket knife with a cheap, plastic grip", ~
+  "some frayed string", ~
+  "one small safety match", ~
+  "a key with a bone motif. probably not{13}actual bone, but i couldn't be sure.", ~
+  ""
+  
   
   ; OBJECT FLAG BIT POSITIONS
   const \fl_OBJECT_is_used = 7
@@ -264,12 +274,12 @@ proc show_location
   let \room_has_visible_door = 0
   
   print "{CLEAR}"
-  print "{REV_ON}",\rooms$[\current_room],"{REV_OFF}"
+  print "{LIGHT_GRAY}{REV_ON}",\rooms$[\current_room],"{REV_OFF}{LIGHT_BLUE}"
   print \room_descriptions$[\current_room]
   
   call check_room_for_objects
   
-  print ""
+  ;print ""
   
   let current_exits = \current_room * 7
   let n$ = \map$[current_exits+1]
@@ -279,6 +289,8 @@ proc show_location
   let u$ = \map$[current_exits+5]
   let d$ = \map$[current_exits+6]
   
+   
+
     
   ; GET VALUE OF NUMERIC PART
   \n = val!(n$+1)
@@ -371,29 +383,35 @@ proc process_instruction
   if strcmp(\instr$, "up"   ) = 0 then \instr$ = "u"
   if strcmp(\instr$, "down" ) = 0 then \instr$ = "d"
 
+
+  ; Check to see if we are talking about an object in your possession? 
+  let first_space = strpos!(\instr$," ")+1
+  let _ob_instr$=\instr$+first_space
+  let in_possession = 0
+
+  ; check the object list for this name
+  for i = 0 to \num_objects
   
+    ; Do you have the object in your possession?
+    if strcmp(_ob_instr$, \objects$[i])=0 and \object_locations[i]=0 then
+      object_id = i
+      in_possession = 1
+    endif
+    
+  next i
+  
+
   
   if strpos!(\instr$,"use")=0 or strpos!(\instr$,"wear")=0 then
   
-      let first_space = strpos!(\instr$," ")+1
-      \instr$=\instr$+first_space
-      let in_possession = 0
-      for i = 0 to \num_objects
-      
-        ; Do you have the object in your possession?
-        if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=0 then
-          object_id = i
-          in_possession = 1
-        endif
-        
-      next i
-
       ; you have it in your possession
       if in_possession = 0 then  
           print "{13}you could, if that was something you possessed"
       else  
       
+      
         ; Use a key ...
+        let \instr$ = _ob_instr$
         if strpos!(\instr$, " key") < 255 then
         
           let correct_key = 0
@@ -469,6 +487,7 @@ proc process_instruction
   ; things you can only do if there is light
   if get_flag!(\room_properties![\current_room],\fl_ROOM_is_dark) = 0 then 
 
+      ; pick something up?
       if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then 
     
         let first_space = strpos!(\instr$," ")+1
@@ -484,7 +503,30 @@ proc process_instruction
           endif
         next i
         
-    endif
+      endif
+      
+      ; Examine X
+      if strpos!(\instr$,"ex")=0 then
+      
+          ; you have it in your possession
+          if in_possession = 0 then 
+              print "{13}{LIGHT_RED}difficult to see{LIGHT_BLUE}{13}pick it up, get a closer look?"
+              print "use 'get ",_ob_instr$,"'"
+              print ""
+              call wait_key
+              instruction_ok = 1
+          else  
+      
+            ; Pull up the description
+            print "{13}{REV_ON}",\objects$[object_id],"{REV_OFF}"
+            print \object_descriptions$[object_id]
+            print ""
+            call wait_key
+            instruction_ok = 1
+            
+          endif
+      
+      endif
         
   endif
 
@@ -614,8 +656,7 @@ endproc
 
 proc get_instruction
 
-  print ""
-  print "your instruction?"
+  print "{13}{LIGHT_GRAY}your instruction?{LIGHT_BLUE}"
   print ""
   input \instr$, 20
   print ""
