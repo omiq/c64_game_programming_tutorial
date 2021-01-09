@@ -57,7 +57,7 @@ sys $FF81 : rem Initialize VIC, restore default input/output to keyboard/screen,
 poke $0286,1    ;text
 poke $D020 ,14  ;border
 poke $D021,14 ;changes the background color.
-sys $E544
+;sys $E544
 
 curpos 0,0 
 for i! = 0 to 255
