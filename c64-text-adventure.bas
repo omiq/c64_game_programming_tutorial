@@ -94,7 +94,7 @@ proc initialise
   data \object_properties![] = 0,%00010100,0,0,0,0,%01010010,%00010100
 
   
-  data \original_object_locations[] = 0,1,5,1,3,3,2,1
+  data \original_object_locations[] = 0,1,5,1,3,3,2,4
   dim \object_locations[\num_objects]
   
   ; reset on restart
