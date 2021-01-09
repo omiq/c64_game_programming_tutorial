@@ -1,16 +1,14 @@
-
+; rem the picture data
+data _pic![] = incbin "retro.koa"
   
-; load defaults (but doesn't seem to work')
-let DEF_A = 27
-let DEF_B = 200 
-let DEF_C = 151
-let DEF_D = 21
-
 ; switch to bitmap mode 
 rem -- Configure VIC to bank 0,
 rem -- bitmap address at $2000
 poke $dd00, peek!($dd00) | %00000011
 poke $d018, peek!($d018) | %00001000
+
+; set border to black
+poke $D020,0  ;border
 
 rem -- Enable multicolor bitmap mode
 poke $d011, peek!($d011) | %00100000
@@ -48,6 +46,11 @@ endproc
 
 call wait_key
 
+;==========================
+; ^^^^ Bitmap vvv Text
+;==========================
+
+
 rem -- reset the screen
 sys $FF81 : rem Initialize VIC, restore default input/output to keyboard/screen, clear screen, set PAL/NTSC switch and interrupt timer
 
@@ -62,19 +65,17 @@ for i! = 0 to 255
   poke 1024+i!, _ths!
 next i!
 
-curpos 10 , 18 
-print "{CLR}"
-print "FOR SOME REASON THIS DOES NOT SHOW UP"
-print "for some reason this does not show up"
+
+curpos 0, 12
+print "this text will be upper case"
+print "{DARK_GRAY}{REVERSE ON}grey{REVERSE OFF}"
 
 charat 10,10,65
-textat 10,12,"weird HUH?"
+textat 10,16,"cool huh?"
+
+rem -- set colors
+memset $d800, 500, 0
 
 call wait_key
 end
 
-
-
-
-; rem the picture data
-data _pic![] = incbin "christmas-night.koa"
