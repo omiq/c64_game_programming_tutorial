@@ -14,13 +14,17 @@ include "bits.bas"
 
 
 proc initialise
-  let \_debug!=0
-  let \won_the_game! = 0
-  let \is_alive! = 1
+  let \_debug!=0            ; for outputting debug code - future add teleport etc commands
+  let \_moves=0             ; move counter - integer because in theory a game could be > 255
+  let \won_the_game! = 0    ; did they win?
+  let \is_alive! = 1        ; are they dead?
+  
+  ; movement and location
   let \current_room = 1
   let \room_has_visible_door = 0
   let \door_max = 10
 
+  ; string buffers
   dim \buff![21]
   \instr$ = @\buff!
   let \n = 0
@@ -34,7 +38,6 @@ proc initialise
   const \num_objects = 8
   const \num_rooms = 10
   
-
   
   ; DOOR FLAG BIT POSITIONS
   const \fl_DOOR_is_hidden = 7
@@ -70,7 +73,7 @@ proc initialise
   data \object_descriptions$[] = "", ~
   "it's a key. made out of brass.", ~
   "a small, off-white coloured mouse. he says 'get off me you oaf!'", ~
-  "a pair of red-blue 3d glasses of the kind given out in old cinemas", ~
+  "a pair of red-blue 3d glasses{13}the kind given out for old movies", ~
   "a pocket knife with a cheap, plastic grip", ~
   "some frayed string", ~
   "one small safety match", ~
@@ -87,14 +90,19 @@ proc initialise
   const \fl_OBJECT_is_key = 2
   const \fl_OBJECT_gives_light = 1
   const \fl_OBJECT_is_hidden = 0
-  
+
+  data \original_object_properties![] = 0,%00010100,0,0,0,0,%01010010,%00010100  
   data \object_properties![] = 0,%00010100,0,0,0,0,%01010010,%00010100
+
   
   data \original_object_locations[] = 0,1,5,1,3,3,2,1
   dim \object_locations[\num_objects]
-  for obj = 0 to \num_objects
-    let \object_locations[obj]=\original_object_locations[obj]
-  next obj
+  
+  ; reset on restart
+  for obj! = 0 to cast!(\num_objects)
+    let \object_locations[obj!]=\original_object_locations[obj!]
+    let \object_properties![obj!]=\original_object_properties![obj!]
+  next obj!
 
  
   ; ROOM DEFINITIONS
@@ -107,6 +115,10 @@ proc initialise
   
   data \room_original_properties![]=0,0,0,0,0,%00000010,0,0,0,0,0
   data \room_properties![]=0,0,0,0,0,%00000010,0,0,0,0,0
+  
+  for rm! = 0 to cast!(\num_rooms)
+    let \room_properties![rm!]=\room_original_properties![rm!]
+  next rm!
   
   data \room_descriptions$[] = "", ~
                   "this is the main room of the house", ~
@@ -121,7 +133,7 @@ proc initialise
 
 
   rem            rm    n    s    e    w    u    d
-
+  rem            ------------------------------------
   data \map$[] ="00", "0", "0", "0", "0", "0", "0", ~
                 "01","D5","D2","D3","-0","-0","-0", ~
                 "02","-1","-0","-0","-0","-0","-0", ~
@@ -143,7 +155,7 @@ endproc
 
 proc wait_key
 
-  print "{REV_ON}press a key to continue{REV_OFF}"
+  print "{REV_ON}{GRAY}press a key to continue{LIGHT_GRAY}{REV_OFF}"
   loop:
     let key! = inkey!()
     if key! = 0 then goto loop
@@ -170,6 +182,7 @@ proc end_screen
   else
     print "oop - you failed. try again?"
   endif
+  print "{13}total moves this game: ", \_moves
   print ""
   call wait_key
   
@@ -456,22 +469,26 @@ proc process_instruction
             endif
           next this_direction
           
-          if door_now_visible = 1 then print "a previously hidden door has appeared!"
+          if door_now_visible = 1 then print "{13}a previously hidden door has appeared!{13}"
           instruction_ok = 1
           call wait_key
         endif        
         
       
         ; Use lighting device
-        if get_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)=1 then 
-          print "{13}the ", \objects$[object_id], " lights up the room"
-          let \room_properties![\current_room] = unset_flag!(\room_properties![\current_room],\fl_ROOM_is_dark)
+        if get_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)=1 and get_flag!(\object_properties![object_id],\fl_OBJECT_is_used)=0 then 
           
           ; matches get one use only! this means you still possess it but it doesn't give off light
-          if get_flag!(\object_properties![object_id],\fl_OBJECT_is_consumable)=1 then let \object_properties![object_id] = unset_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)
+          if get_flag!(\object_properties![object_id],\fl_OBJECT_is_consumable)=1 then 
+            let \object_properties![object_id] = unset_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)
+            let \object_properties![object_id] = set_flag!(\object_properties![object_id],\fl_OBJECT_is_used)
+          endif
+
+          print "{13}the ", \objects$[object_id], " lights up the room"
+          let \room_properties![\current_room] = unset_flag!(\room_properties![\current_room],\fl_ROOM_is_dark)
+          instruction_ok = 1
           
           ; done
-          instruction_ok = 1
           call wait_key
         endif
       
@@ -519,7 +536,8 @@ proc process_instruction
       
             ; Pull up the description
             print "{13}{REV_ON}",\objects$[object_id],"{REV_OFF}"
-            print \object_descriptions$[object_id]
+            print \object_descriptions$[object_id];
+            if get_flag!(\object_properties![object_id],\fl_OBJECT_is_used)=1 then print " (used)"
             print ""
             call wait_key
             instruction_ok = 1
@@ -679,6 +697,7 @@ proc main
       call show_location
       call get_instruction
       call process_instruction
+      inc \_moves
       
     endwhile
     
