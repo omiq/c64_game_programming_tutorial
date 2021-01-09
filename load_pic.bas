@@ -56,10 +56,20 @@ poke $D020 ,14  ;border
 poke $D021,14 ;changes the background color.
 sys $E544
 
+curpos 0,0 
 for i! = 0 to 255
   let _ths! = i!
   poke 1024+i!, _ths!
 next i!
+
+curpos 10 , 18 
+print "{CLR}"
+print "FOR SOME REASON THIS DOES NOT SHOW UP"
+print "for some reason this does not show up"
+
+charat 10,10,65
+textat 10,12,"weird HUH?"
+
 call wait_key
 end
 
