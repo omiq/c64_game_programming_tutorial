@@ -14,7 +14,7 @@ include "bits.bas"
 
 
 proc initialise
-  let \_debug!=0            ; for outputting debug code - future add teleport etc commands
+  let \_debug!=1            ; for outputting debug code - future add teleport etc commands
   let \_moves=0             ; move counter - integer because in theory a game could be > 255
   let \won_the_game! = 0    ; did they win?
   let \is_alive! = 1        ; are they dead?
@@ -414,75 +414,6 @@ proc process_instruction
   next i
   
 
-  
-  if strpos!(\instr$,"use")=0 or strpos!(\instr$,"wear")=0 then
-  
-      ; you have it in your possession
-      if in_possession = 0 then  
-          print "{13}you could, if that was something you possessed"
-      else  
-      
-      
-        ; Use a key ...
-        let \instr$ = _ob_instr$
-        if strpos!(\instr$, " key") < 255 then
-        
-          let correct_key = 0
-          for r = 1 to 6
-          
-              ; the door will match the position in the table of n,s,e,w,u,d
-              let door_id! = (\current_room * 7) + r
-              
-              ; find the key that is required for this door
-              let current_key_needed = key_fit(door_id!)
-              
-              if \_debug!=1 then print "room: ", \current_room," need: ",current_key_needed, " for door ", door_id!, " got: ", object_id  
-              
-              ; well we have a match but can we SEE the door?
-              if current_key_needed = object_id and get_flag!(\doors![door_id!],\fl_DOOR_is_hidden)=0 then 
-                let correct_key = 1   
-                let \doors![door_id!] = unset_flag!(\doors![door_id!],\fl_DOOR_is_locked)
-              endif
-          next r
-
-          if correct_key = 1 then
-            print "trying ", \objects$[object_id], " in door was successful"
-
-          else
-            print "{13}seems ", \objects$[object_id], " doesn't fit,{13}try another door "
-
-          endif
-          
-          instruction_ok = 1
-          call wait_key
-        endif
-
-       
-      
-        ; Use lighting device
-        if get_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)=1 and get_flag!(\object_properties![object_id],\fl_OBJECT_is_used)=0 then 
-          
-          ; matches get one use only! this means you still possess it but it doesn't give off light
-          if get_flag!(\object_properties![object_id],\fl_OBJECT_is_consumable)=1 then 
-            let \object_properties![object_id] = unset_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)
-            let \object_properties![object_id] = set_flag!(\object_properties![object_id],\fl_OBJECT_is_used)
-          endif
-
-          print "{13}the ", \objects$[object_id], " lights up the room"
-          let \room_properties![\current_room] = unset_flag!(\room_properties![\current_room],\fl_ROOM_is_dark)
-          instruction_ok = 1
-          
-          ; done
-          call wait_key
-        endif
-      
-      ; end of in-possession 
-      endif  
-
-      print ""
-
-  endif
-
 
   ; DEBUG MAGICS
   if \_debug!=1 then
@@ -517,27 +448,22 @@ proc process_instruction
         
     endif
 
-  
-  
   endif
 
-  let is_get_command=0  
+
  
   ; things you can only do if there is light
+  let _its_dark = 0
   if get_flag!(\room_properties![\current_room],\fl_ROOM_is_dark) = 1 then 
-    
-        print "{13}{LIGHT_RED}it's dark in here{LIGHT_BLUE}";
-        instruction_ok = 0
   
-  else
+    let _its_dark = 1
 
+  else
       ; pick something up?
       if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then 
     
         let first_space = strpos!(\instr$," ")+1
         \instr$=\instr$+first_space
-        
-      
         
         for i = 0 to \num_objects
           if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=\current_room then 
@@ -575,8 +501,57 @@ proc process_instruction
       
       endif
       
+      
+  endif   
+       
+
+
+  ; USE OR WEAR
+  if strpos!(\instr$,"use")=0 or strpos!(\instr$,"wear")=0 then
+  
+      ; you have it in your possession
+      if in_possession = 0 then  
+          print "{13}you could, if that was something you possessed"
+      else  
+      
+      
+        ; Use a key ...
+        let first_space = strpos!(\instr$," ")+1
+        \instr$=\instr$+first_space
+        if strpos!(\instr$, " key") < 255 then
+        
+          let correct_key = 0
+          for r = 1 to 6
+          
+              ; the door will match the position in the table of n,s,e,w,u,d
+              let door_id! = (\current_room * 7) + r
+              
+              ; find the key that is required for this door
+              let current_key_needed = key_fit(door_id!)
+              
+              if \_debug!=1 then print "room: ", \current_room," need: ",current_key_needed, " for door ", door_id!, " got: ", object_id  
+              
+              ; well we have a match but can we SEE the door?
+              if current_key_needed = object_id and get_flag!(\doors![door_id!],\fl_DOOR_is_hidden)=0 then 
+                let correct_key = 1   
+                let \doors![door_id!] = unset_flag!(\doors![door_id!],\fl_DOOR_is_locked)
+              endif
+          next r
+
+          if correct_key = 1 then
+            print "trying ", \objects$[object_id], " in door was successful"
+
+          else
+            print "{13}seems ", \objects$[object_id], " doesn't fit,{13}try another door "
+
+          endif
+          
+          instruction_ok = 1
+          call wait_key
+        endif
+
         ; Use 3d glasses
-        if strpos!(\instr$, "3d glasses") < 255 then
+        if strpos!(\instr$, "3d glasses") < 255 and _its_dark = 0 then
           
           let door_now_visible = 0
           for this_direction = 1 to 6
@@ -590,11 +565,42 @@ proc process_instruction
           if door_now_visible = 1 then print "{13}a previously hidden door has appeared!{13}"
           instruction_ok = 1
           call wait_key
-        endif        
-  
        
-  endif
+        endif   
 
+
+        ; MAKE LIGHT
+        if get_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)=1 and get_flag!(\object_properties![object_id],\fl_OBJECT_is_used)=0 then 
+            
+          ; Use lighting device when it is already light?
+          if _its_dark = 0 then
+          
+              print "{13}wait until it is dark?"
+              instruction_ok = 1
+          
+          else  
+            ; matches get one use only! this means you still possess it but it doesn't give off light
+            if get_flag!(\object_properties![object_id],\fl_OBJECT_is_consumable)=1 then 
+              let \object_properties![object_id] = unset_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)
+              let \object_properties![object_id] = set_flag!(\object_properties![object_id],\fl_OBJECT_is_used)
+            endif
+
+            print "{13}the ", \objects$[object_id], " lights up the room"
+            let \room_properties![\current_room] = unset_flag!(\room_properties![\current_room],\fl_ROOM_is_dark)
+            instruction_ok = 1
+          endif
+          
+          ; done
+          call wait_key
+        endif
+
+      ; end of in-possession 
+      endif  
+
+      print ""
+
+  endif
+  
   
 
   ; drop an object
