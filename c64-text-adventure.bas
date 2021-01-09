@@ -105,7 +105,12 @@ proc initialise
 
  
   ; ROOM DEFINITIONS
-  data \rooms$[] = "nowhere", "main room", "small closet", "east wing", "loft", "lobby"
+  data \rooms$[] =  "                 ", ~
+                    "main room", ~
+                    "small closet", ~
+                    "east wing", ~
+                    "loft", ~
+                    "lobby"
   
     ; ROOM FLAG BIT POSITIONS
   const \fl_ROOM_is_hidden = 0
@@ -437,12 +442,18 @@ proc process_instruction
         let first_space = strpos!(\instr$," ")+1
         \instr$=\instr$+first_space
         
+        let old_current_room = \current_room
         for rm = 1 to \num_rooms
           if strcmp(\instr$,\rooms$[rm])=0 then 
             \current_room = rm
           endif
         next rm
         
+        if old_current_room = \current_room then
+          print "{13}",\instr$," not found"
+        else
+          print "{13}disapparating from ",\rooms$[old_current_room], " to ",\rooms$[\current_room]
+        endif
         instruction_ok = 1
         call wait_key
         
