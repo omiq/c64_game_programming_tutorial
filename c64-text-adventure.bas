@@ -80,7 +80,6 @@ proc initialise
   "a key with a bone motif. probably not{13}actual bone, but i couldn't be sure.", ~
   ""
   
-  
   ; OBJECT FLAG BIT POSITIONS
   const \fl_OBJECT_is_used = 7
   const \fl_OBJECT_is_consumable = 6
@@ -384,6 +383,7 @@ endproc
 proc process_instruction
 
   let instruction_ok = 0
+  let old_current_room = \current_room
   
   if strpos!(\instr$, "go ") = 0 then 
     \instr$ = \instr$ + 3
@@ -457,23 +457,7 @@ proc process_instruction
           call wait_key
         endif
 
-        ; Use 3d glasses
-        if strpos!(\instr$, "3d glasses") < 255 then
-          
-          let door_now_visible = 0
-          for this_direction = 1 to 6
-            let this_door = (\current_room * 7) + this_direction
-            if get_flag!(\doors![this_door],\fl_DOOR_is_hidden) = 1 then
-              let \doors![this_door] = unset_flag!(\doors![this_door],\fl_DOOR_is_hidden) 
-              door_now_visible = 1
-            endif
-          next this_direction
-          
-          if door_now_visible = 1 then print "{13}a previously hidden door has appeared!{13}"
-          instruction_ok = 1
-          call wait_key
-        endif        
-        
+       
       
         ; Use lighting device
         if get_flag!(\object_properties![object_id],\fl_OBJECT_gives_light)=1 and get_flag!(\object_properties![object_id],\fl_OBJECT_is_used)=0 then 
@@ -498,17 +482,62 @@ proc process_instruction
       print ""
 
   endif
+
+
+  ; DEBUG MAGICS
+  if \_debug!=1 then
+    
+    ; MAGICALLY GET ALL THE THINGS
+    if strpos!(\instr$,"accio")=0 then
   
-  let is_get_command=0
+        for i = 1 to \num_objects
+            print "{218} got ",\objects$[i]
+             \object_locations[i]=0
+        next i
+        
+        instruction_ok = 1
+        call wait_key
+        
+    endif
+    
+    ; MAGICALLY TELEPORT
+    if strpos!(\instr$,"apparate")=0 then
+    
+        let first_space = strpos!(\instr$," ")+1
+        \instr$=\instr$+first_space
+        
+        for rm = 1 to \num_rooms
+          if strcmp(\instr$,\rooms$[rm])=0 then 
+            \current_room = rm
+          endif
+        next rm
+        
+        instruction_ok = 1
+        call wait_key
+        
+    endif
+
   
+  
+  endif
+
+  let is_get_command=0  
+ 
   ; things you can only do if there is light
-  if get_flag!(\room_properties![\current_room],\fl_ROOM_is_dark) = 0 then 
+  if get_flag!(\room_properties![\current_room],\fl_ROOM_is_dark) = 1 then 
+    
+        print "{13}{LIGHT_RED}it's dark in here{LIGHT_BLUE}";
+        instruction_ok = 0
+  
+  else
 
       ; pick something up?
       if strpos!(\instr$,"get")=0 or strpos!(\instr$,"take")=0 then 
     
         let first_space = strpos!(\instr$," ")+1
         \instr$=\instr$+first_space
+        
+      
         
         for i = 0 to \num_objects
           if strcmp(\instr$, \objects$[i])=0 and \object_locations[i]=\current_room then 
@@ -545,12 +574,30 @@ proc process_instruction
           endif
       
       endif
-        
+      
+        ; Use 3d glasses
+        if strpos!(\instr$, "3d glasses") < 255 then
+          
+          let door_now_visible = 0
+          for this_direction = 1 to 6
+            let this_door = (\current_room * 7) + this_direction
+            if get_flag!(\doors![this_door],\fl_DOOR_is_hidden) = 1 then
+              let \doors![this_door] = unset_flag!(\doors![this_door],\fl_DOOR_is_hidden) 
+              door_now_visible = 1
+            endif
+          next this_direction
+          
+          if door_now_visible = 1 then print "{13}a previously hidden door has appeared!{13}"
+          instruction_ok = 1
+          call wait_key
+        endif        
+  
+       
   endif
 
   
 
-
+  ; drop an object
   if strpos!(\instr$,"drop")=0 or strpos!(\instr$,"give")=0 then
   
       let first_space = strpos!(\instr$," ")+1
@@ -568,7 +615,7 @@ proc process_instruction
       
   endif
     
-  
+  ; help
   if strcmp(\instr$,"help")=0 then
   
       instruction_ok = 1
@@ -576,7 +623,8 @@ proc process_instruction
       call wait_key
   
   endif
-  
+
+  ; inventory
   if strcmp(\instr$,"inventory")=0 or strcmp(\instr$,"i")=0 then
   
       instruction_ok = 1
@@ -598,6 +646,7 @@ proc process_instruction
   
   endif
   
+  ; quit the game
   if strcmp(\instr$,"quit")=0 then
 
       \won_the_game! = 0      
@@ -605,7 +654,8 @@ proc process_instruction
       \is_alive! = 0
       
   endif
-  
+
+  ; directions
   if strcmp(\instr$,"n")=0 then
     if \n > 0 then 
       instruction_ok = 1
@@ -661,6 +711,16 @@ proc process_instruction
   endif
 
   
+  ; are we moving?
+  if old_current_room <> \current_room and get_flag!(\room_original_properties![old_current_room],\fl_ROOM_is_dark) = 1 then
+    
+    ; turn the light off
+    let \room_properties![old_current_room] = set_flag!(\room_properties![old_current_room],\fl_ROOM_is_dark)
+    
+  endif
+  
+  
+  
   if instruction_ok = 0 then
     print ""
     print "{LIGHT_RED}oops, can't do that!{LIGHT_BLUE}"
@@ -669,6 +729,8 @@ proc process_instruction
   endif
   
   \instr$ = "                  "
+  
+_instructions_done:
   
 endproc
 
