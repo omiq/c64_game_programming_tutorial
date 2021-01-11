@@ -108,13 +108,17 @@ proc _sfx_oops
 
   memset 54272,24,0
   
-  for _b = 1 to 4000
-    poke 54290,33
-    poke 54291,74
+
+  for _b = 1 to 8000
     poke 54296,15
     poke 54273,17
     poke 54272,37
-    poke 54290,128
+    poke 54276,128
+
+  poke 54296,15
+  poke 54277,8
+  poke 54276,33
+
   next _b
   poke 54276,16
   
