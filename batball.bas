@@ -3,12 +3,14 @@ include "xcb-ext-sprite.bas"
 CONST \RASTER_LINE  = $d012
 CONST SHAPES_START = $2000
 
+dim \_count_bounce fast
 dim \_ball_x! fast
 dim \_ball_y! fast
 dim \_ball_xdir fast
 dim \_ball_ydir fast
 dim \x! fast
 dim \y! fast
+dim \speed fast
 
 ; add sprite data to sprite memory
 data _ball_sprite![]= incbin "ball.bin"
@@ -40,8 +42,11 @@ poke $D020,14  ;border
 
 proc _init
 
-  let \_ball_x! = 0
-  let \_ball_y! = 0
+
+  let \_count_bounce = 0
+
+  let \_ball_x! = 50
+  let \_ball_y! = 50
   let \_ball_xdir = 1
   let \_ball_ydir = 1
 
@@ -75,10 +80,53 @@ proc _init
   
 endproc
 
+proc _sfx_bounce
+
+  memset 54272,24,0
+  poke 54296,15
+  poke 54277,190
+  poke 54278,248
+  poke 54276,129
+  
+  for _b = 1 to 400
+    poke 54296,15
+    poke 54273,17
+    poke 54272,37
+    poke 54276,17
+  next _b
+  poke 54276,16
+  
+  inc \_count_bounce
+  if \_count_bounce > 10 then \speed = 2
+  if \_count_bounce > 20 then \speed = 4
+  if \_count_bounce > 50 then \speed = 8
+  
+endproc
+
+
+proc _sfx_oops
+
+  memset 54272,24,0
+  
+  for _b = 1 to 4000
+    poke 54290,33
+    poke 54291,74
+    poke 54296,15
+    poke 54273,17
+    poke 54272,37
+    poke 54290,128
+  next _b
+  poke 54276,16
+  
+endproc
+
+
 ; Waits for keypress
 proc bounce_loop
 
   let key! = 0
+  
+  ; Waits for escape key or no lives
   while key! <> 3 and \lives > 0 
   
      ; Wait virtical blank
@@ -92,17 +140,27 @@ proc bounce_loop
     if key! = 76 and \x! <= 182 then \x! = \x! + 8
     
     ; At left or right border?
-    if \_ball_x! = 200 then let \_ball_xdir = -1 * \speed
-    if \_ball_x! = 20 then let \_ball_xdir = \speed 
-   
+    if \_ball_x! = 200 then 
+      call _sfx_bounce
+      let \_ball_xdir = -1 * \speed
+    endif
+    
+    if \_ball_x! = 20 then 
+      call _sfx_bounce
+      let \_ball_xdir = \speed 
+    endif
+    
     ; At bottom or top?
     if \_ball_y! = 240 then 
       let \_ball_ydir = -1 * \speed
+      call _sfx_oops
       dec \lives
     endif
     
-    if \_ball_y! = 44 then let \_ball_ydir = \speed
-
+    if \_ball_y! = 44 then 
+      call _sfx_bounce
+      let \_ball_ydir = \speed
+    endif
     
     ; Move sprite horizontal
     let \_ball_x! = \_ball_x! + \_ball_xdir
@@ -117,7 +175,10 @@ proc bounce_loop
     
       
     ; COLLISIONS??
-    if spr_spr_collision!(0) = 1 and \_ball_ydir = (1 * \speed) then let \_ball_ydir = -1 * \speed
+    if spr_spr_collision!(0) = 1 and \_ball_ydir = (1 * \speed) then 
+      let \_ball_ydir = -1 * \speed
+      call _sfx_bounce
+    endif
     
     textat 33,2, \lives
   
