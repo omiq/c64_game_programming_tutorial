@@ -40,6 +40,9 @@ poke $d021, 0
 ; set border
 poke $D020,14  ;border
 
+; Keyboard auto-repeat
+poke 650,128
+
 proc _init
 
 
