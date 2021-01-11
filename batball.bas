@@ -21,8 +21,8 @@ memcpy  @_bat_sprite!,SHAPES_START+64,64
 ; set up the sprite
 call spr_setshape(0, SHAPES_START/64)
 call spr_setshape(1, (SHAPES_START+64)/64)
-call spr_setcolor(0, 4)
-call spr_setcolor(1, 4)
+call spr_setcolor(0, $01)
+call spr_setcolor(1, $01)
 call spr_setmulti(0)
 call spr_setmulti(1)
 spr_multicolor1! = $0c
@@ -70,12 +70,12 @@ proc _init
   for r = 0 to 24
     let _m = 24+ 1024 + (r*40)
     poke _m,66
-
+    memset 55296+((r*40)+24),8,$0E
   next r
 
   ; Score table
   textat 26,2,"lives:    "
-
+  textat 26,4,"score:    "
 
   
 endproc
@@ -185,7 +185,8 @@ proc bounce_loop
     endif
     
     textat 33,2, \lives
-  
+    textat 33,4, \_count_bounce
+    
   endwhile
   
 endproc  
