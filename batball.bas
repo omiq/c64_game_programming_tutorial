@@ -43,6 +43,21 @@ poke $D020,14  ;border
 ; Keyboard auto-repeat
 poke 650,128
 
+proc _title
+  
+  print "{CLR}"
+  curpos 10,10
+  print "{LIGHT_GRAY}bat and ball game"
+  curpos 8,12
+  print "{GRAY}{REV_ON}press space to start{REV_OFF}"
+  curpos 10,14
+  print "{BLUE}keys: i, j, k & l"
+  while inkey!()=0
+    rem
+  endwhile
+
+endproc
+
 proc _init
 
 
@@ -100,9 +115,15 @@ proc _sfx_bounce
   poke 54276,16
   
   inc \_count_bounce
-  if \_count_bounce > 10 then \speed = 2
-  if \_count_bounce > 20 then \speed = 4
-  if \_count_bounce > 50 then \speed = 8
+  if \_count_bounce < 10 then \speed = 1
+  if \_count_bounce >= 10 then \speed = 2
+  if \_count_bounce >= 20 then \speed = 4
+  if \_count_bounce >= 30 then \speed = 6
+  if \_count_bounce >= 40 then \speed = 8
+  if \_count_bounce >= 50 then \speed = 10
+  if \_count_bounce >= 60 then \speed = 12
+  if \_count_bounce >= 70 then \speed = 14
+
   
 endproc
 
@@ -139,7 +160,9 @@ proc bounce_loop
      ; Wait virtical blank
     watch \RASTER_LINE, 250
     
+    enableirq
     let key! = inkey!()
+    disableirq
     
     if key! = 73 and \y! >= 42 then \y! = \y! - 8
     if key! = 74 and \x! >= 32 then \x! = \x! - 8
@@ -189,14 +212,17 @@ proc bounce_loop
     
     textat 33,2, \lives
     textat 33,4, \_count_bounce
-    
+
+
   endwhile
   
 endproc  
 
 while 1=1
-  
+
+  call _title
   call _init
+
   call bounce_loop
   
 endwhile
