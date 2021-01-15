@@ -1,0 +1,13 @@
+; labels
+al  $410 .EndBlock400
+al  $400 .StartBlock400
+al  $413 .print_number_text
+al  $418 .printstring
+al  $41a .printstringloop
+al  $427 .printstring_skip
+al  $432 .printstring_done
+al  $433 .block1
+al  $444 .MainProgram_printnumber_l13
+al  $454 .MainProgram_printnumber_l24
+al  $46c .EndBlock410
+; breakpoints

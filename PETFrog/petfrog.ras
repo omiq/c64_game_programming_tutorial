@@ -1,0 +1,235 @@
+program ScreenTest;
+var  
+
+       	i,c: integer = 0; 
+       	ch: byte = 0;
+		cs : cstring = "TRSE SPEAK PETSCII";     
+		KEYB: integer = 172;
+		rom4: cstring ="4.0 rom";
+		rom2: cstring ="2.0 rom";
+		arrp:	pointer;	
+
+const	KEYB: 	address = 151;	// Keys being pressed
+const	KEYBUF:	address = 158;	// Keyboard buffer
+
+
+
+/*
+1   2   3   4   5   6   7   8   9   0   1   2   3   4   5   6   7   8   9   20  1   2   3   4   5   6   7   8   9   30  1   2   3   4   5   6   7   8   9   40   
+*/
+frogchar: byte = 214;
+
+
+crockr: array[9] of byte = ( 192,162,220,220,220,220,220, 98,121,);
+crockl: array[9] of byte = ( 121, 98,220,220,220,220,220,162,192,);
+logr: array[5] of byte = ( 168,168,168,168,209,);
+logl: array[5] of byte = ( 209,169,169,169, 86,);
+//charspr: array[240] of byte = ( 227,227,227,227,);
+//charspr: array[240] of byte = ( 240,207,208,224,);
+//charspr: array[240] of byte = ( 237,215,215,160,);
+//charspr: array[240] of byte = ( 173,173,173,173,173,173,173,173,);
+//charspr: array[240] of byte = ( 224, 96, 96, 96,254,235,238,224,);
+truckt: array[8] of byte = ( 160,215, 98,215,241,215,253,160,);
+truckb: array[8] of byte = ( 226,226,226,226,226,226,226,226,);
+
+
+
+
+
+petscii1: array[240] of byte = (
+$CF,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$D0,
+$F4,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$90,$85,$94,$86,$92,$8F,$87,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$EA,
+$F4,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$EA,
+$CC,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$FA,
+$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,
+$E6,$E6,$20,$20,$20,$20,$E6,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$20,$20,$20,$20,$E6,
+);
+
+petscii2: array[240] of byte = (
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$C0,$A2,$DC,$DC,$DC,$DC,$DC,$62,$79,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$A8,$A8,$A8,$A8,$A8,$A8,$D1,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$79,$62,$DC,$DC,$DC,$DC,$DC,$A2,$C0,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$D1,$A9,$A9,$A9,$A9,$20,$20,$20,$56,$20,$20,$20,$20,$20,$20,$20,$20,$D1,$A9,$A9,$A9,$A9,$20,$20,$20,
+);
+
+petscii3: array[240] of byte = (
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$68,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$68,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$20,$20,$20,$20,$20,$20,
+$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$68,
+$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,
+$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,
+$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$F0,$CF,$D0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$F0,$CF,$D0,$E0,$E0,$E0,$E0,$F0,$CF,$D0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,
+);
+
+petscii4: array[240] of byte = (
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$ED,$D7,$D7,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$ED,$D7,$D7,$A0,$A0,$A0,$A0,$ED,$D7,$D7,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,
+$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$60,$60,$60,$FE,$EB,$EE,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$A0,$A0,$A0,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$D7,$62,$D7,$F1,$D7,$FD,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,
+$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,
+);
+
+
+petscii5: array[40] of byte = (
+$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$D6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6
+);
+	
+		
+/* =============================================================================================== */
+
+
+procedure cls();
+begin
+	fill(screen_char_loc,255,32);       // Fill rows of spaces 
+	fill(screen_char_loc+250, 255,32 ); // 
+	fill(screen_char_loc+500, 255,32 ); //  
+	fill(screen_char_loc+750, 255,32 ); // 
+	moveto(0,0,hi(screen_char_loc));
+end;
+
+
+function getkey() : byte;
+
+begin
+
+ 	getkey:=peek(KEYB,0);
+
+end;
+
+
+procedure waitkey();
+begin
+
+	while(getkey()=255) do
+	begin
+		asm("NOP");
+	end;
+
+end;
+
+
+procedure textat(x: byte; y: byte; this_str: pointer; str_len: byte );
+var 
+	zp : pointer;
+	this_key: byte =$FF;
+begin
+	zp:= $8000 + y*40 + x;
+	
+	MemCpyFast( this_str, 0, zp, str_len ); 
+end;
+
+
+begin
+	DefineScreen();	
+	
+	screenmemory := screen_char_loc;
+	screenmemory[0] := 1;  // place the A character at the top left of the display on the C64
+
+	cls();
+	
+/*
+	MemCpy(#petscii1, 0, screenmemory, 240 ); 
+	screenmemory:=$8000+240;
+	MemCpy(#petscii2, 0, screenmemory, 240 ); 
+	screenmemory:=$8000+480;
+	MemCpy(#petscii3, 0, screenmemory, 240 ); 
+	screenmemory:=$8000+720;
+	MemCpy(#petscii4, 0, screenmemory, 240 ); 
+	screenmemory:=$8000+960;
+	MemCpy(#petscii5, 0, screenmemory, 40 ); 
+	screenmemory:=screen_char_loc;
+				
+*/						
+
+MemCpy(#crockr, 0, screenmemory, 9 ); 
+screenmemory:=$8000+40;
+MemCpy(#crockl, 0, screenmemory, 9 ); 
+screenmemory:=$8000+20+40;
+MemCpy(#logl, 0, screenmemory, 5 ); 
+screenmemory:=$8000+20+40+40;
+MemCpy(#logr, 0, screenmemory, 5 ); 
+screenmemory:=$8000+20+40+40+40;
+MemCpy(#truckt, 0, screenmemory, 8 ); 
+screenmemory:=$8000+20+40+40+40+40;
+MemCpy(#truckb, 0, screenmemory, 8 ); 
+	
+	while(this_key<>$20) do
+	begin
+		this_key:=getkey();
+		moveto(20,20,hi(screen_char_loc));
+		printnumber(peek(KEYB,0));
+	end;
+
+waitkey();
+
+	printstring("PRESS SPACE",0,11);	
+	
+	screenmemory:=$8000+80;
+	if(peek(^50003,0) = 160) then
+	begin
+		textat(5,15,#rom4,7);
+	end; //4.0 ROMS
+	
+	if(peek(^50003,0) = 7) then
+	begin
+		textat(5,15,#rom2,8);
+	end; //2.0 ROMS
+	
+
+	screenmemory := screen_char_loc;
+
+	while(this_key<>$20) do
+	begin
+		this_key:=getkey();
+		moveto(20,20,hi(screen_char_loc));
+		printnumber(peek(KEYB,0));
+	end;
+	
+	cls();
+	textat(0,10,"0123456789012345678901234567890123456789",40);	
+
+
+	printnumber(peek(KEYBUF,0));
+
+	waitkey();
+
+	
+	cls();
+	
+	textat(5,16,"006",3);
+	textat(5,17,"007",3);
+	textat(5,18,"008",3);
+	textat(5,19,"009",3);
+
+
+	textat(11,13,"DEF",3);
+	textat(12,14,"HIJ",3);
+	textat(10,12, #cs,4);
+
+
+	screen_char_loc[501] := 250;
+	screen_char_loc[502] := 250;
+	screen_char_loc[503] := 250;
+	screen_char_loc[541] := 250;
+	screen_char_loc[542] := 250;
+	screen_char_loc[543] := 250;	
+	screen_char_loc[581] := 250;
+	screen_char_loc[582] := 250;
+	screen_char_loc[583] := 250;	
+	
+
+    // Loop through all PETSCII characters
+    fori i := 0 to 255 do
+    begin
+    		// Put the character at screen address
+        screen_char_loc[i] := i; 
+    end;
+    
+
+	loop();
+
+end.
+
