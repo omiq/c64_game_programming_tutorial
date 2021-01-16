@@ -52,9 +52,18 @@ str_truckb: cstring = "         ";
 arr_truckt: array[8] of byte = ( 224, 96, 96, 96,254,235,238,224,);
 str_truckt: cstring = "         ";
 
+//                                1   2  3  4  5  6  7  8  9  0  1  2 
+obstacles_x: array[12] of byte = (30, 0,30, 0,0,0,30,30,30,30, 0, 0);
+obstacles_y: array[12] of byte = ( 4, 5, 7, 8,18,19,21,22,15,16,12,13);
 
-crock_a_x: byte = 40;
-crock_b_x: byte = 1;
+/*
+obstacles_x: array[8] of byte = (40, 0,40, 0,40,40, 0, 0);
+obstacles_y: array[8] of byte = ( 7, 8, 9,11,17,18,20,21);
+*/
+
+
+crock_a_x: byte;
+
 
 logo: array[52] of byte = (
 //  1    2   3  4   5   6   7   8   9  10  11  12  13
@@ -102,7 +111,7 @@ petscii_pointer: pointer;
 /*
 1   2   3   4   5   6   7   8   9   0   1   2   3   4   5   6   7   8   9   20  1   2   3   4   5   6   7   8   9   30  1   2   3   4   5   6   7   8   9   40   
 */
-petscii: array[240] of byte = (
+level1: array[240] of byte = (
 $CF,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$D0,
 $F4,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$90,$85,$94,$86,$92,$8F,$87,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$EA,
 $F4,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$EA,
@@ -134,6 +143,36 @@ $E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,
 $E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$D6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6
 );
 	
+
+level2: array[240] of byte = (
+$CC,$EF,$FA,$13,$03,$0F,$12,$05,$3A,$39,$39,$39,$CC,$EF,$EF,$EF,$A0,$90,$85,$94,$86,$92,$8F,$87,$A0,$EF,$EF,$EF,$EF,$FA,$0C,$09,$16,$05,$13,$3A,$33,$CC,$EF,$FA,
+$20,$68,$68,$20,$68,$68,$68,$68,$68,$68,$20,$68,$68,$68,$68,$68,$68,$68,$20,$68,$68,$68,$68,$68,$68,$68,$68,$68,$68,$68,$68,$20,$68,$68,$68,$68,$68,$20,$68,$20,
+$66,$5C,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$20,$66,$66,$66,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$5C,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
+$66,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$68,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$20,$20,$20,$20,$68,$66,
+$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,
+$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
+$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,
+$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66
+);
+
+
 		
 /* =============================================================================================== */
 
@@ -285,7 +324,7 @@ begin
 	screenmemory := $8000;
 */
 
-	petscii_pointer:=#petscii;
+	petscii_pointer:=#level2;
 	CopyFullScreen(petscii_pointer, #screenmemory);
 
 				
@@ -301,7 +340,6 @@ begin
 	MemCpy(#arr_carl, 0, #str_carl, 4 ); 
 	MemCpy(#arr_carr, 0, #str_carr, 4 ); 
 
-	crock_a_x := 0; 
 	frog_x:=20;
 	frog_y:=10;
 	
@@ -348,11 +386,27 @@ begin
 		frog_old_x:=frog_x;
 		frog_old_y:=frog_y;
 		KEYPRESS := getkey();
-		//textat(30,20, #KEYPRESS,1);
+		
+		// Uncomment to show key that was pressed
+		// textat(30,20, #KEYPRESS,1);
+		
+		// Undraw "sprites"
+		textat(obstacles_x[0],obstacles_y[0], #blank_river,9);  // crock
+		textat(obstacles_x[1],obstacles_y[1], #blank_river,9);  // crock	
+		textat(obstacles_x[2],obstacles_y[2], #blank_river,5);  // log
+		textat(obstacles_x[3],obstacles_y[3], #blank_river,5);	  // log
+		textat(obstacles_x[4],obstacles_y[4], #blank_road,4);	  // car	
+		textat(obstacles_x[5],obstacles_y[5], #blank_road,4);	  // car
+		textat(obstacles_x[6],obstacles_y[6], #blank_road,8);	  // truck
+		textat(obstacles_x[7],obstacles_y[7], #blank_road,8);	  // truck
+		textat(obstacles_x[8],obstacles_y[8], #blank_road,4);	  // car
+		textat(obstacles_x[9],obstacles_y[9], #blank_road,4);	  // car
+		textat(obstacles_x[10],obstacles_y[10], #blank_road,8);// truck	
+		textat(obstacles_x[11],obstacles_y[11], #blank_road,8);// truck	
 
 		if(KEYPRESS=184) then
 		begin
-			if(frog_y>4) then
+			if(frog_y>1) then
 			begin
 				dec(frog_y);
 			end;
@@ -400,45 +454,24 @@ begin
 		end;
 
 
-	
-		// Undraw "sprites"
-		textat(40-crock_a_x,7, #blank_river,9);
-		textat(crock_a_x,8,#blank_river,9);	
-		textat(40-crock_a_x,9, #blank_river,5);
-		textat(crock_a_x,11,#blank_river,5);	
-		textat(40-crock_a_x,17, #blank_road,4);
-		textat(40-crock_a_x,18,#blank_road,4);
-		textat(crock_a_x,20, #blank_road,8);
-		textat(crock_a_x,21, #blank_road,8);	
-		
-/*
-		if (crock_a_x < 40) then 
-		begin
-			inc(crock_a_x); 
-		end
-		else
-		begin
-			crock_a_x := 0; 
-		end;
-*/
 
-		// TRSE way
+		// TRSE way of incrementing 
+		// counter with loop back to 0
 		incRange(crock_a_x, 0, 40);
 
-		// Draw "sprites"
-		textat(40-crock_a_x,7, #str_crockr,9);
-		textat(crock_a_x,8,#str_crockl,9);
-
-	
-		textat(40-crock_a_x,9, #str_logr,5);
-		textat(crock_a_x,11,#str_logl,5);
-
-
-		textat(40-crock_a_x,17, #arr_carl,4);
-		textat(40-crock_a_x,18,#arr_carr,4);
-	
-		textat(crock_a_x,20, #arr_truckt,8);
-		textat(crock_a_x,21,#arr_truckb,8);
+		// Draw "sprites"	
+		textat(obstacles_x[0],obstacles_y[0], #str_crockr,9);
+		textat(obstacles_x[1],obstacles_y[1], #str_crockl,9);	
+		textat(obstacles_x[2],obstacles_y[2], #str_logr,5);
+		textat(obstacles_x[3],obstacles_y[3], #str_logl,5);	
+		textat(obstacles_x[4],obstacles_y[4], #arr_carl,4);
+		textat(obstacles_x[5],obstacles_y[5], #arr_carr,4);
+		textat(obstacles_x[6],obstacles_y[6], #arr_truckt,8);// truck
+		textat(obstacles_x[7],obstacles_y[7], #arr_truckb,8);// truck	
+		textat(obstacles_x[8],obstacles_y[8], #arr_truckt,8);// truck
+		textat(obstacles_x[9],obstacles_y[9], #arr_truckb,8);// truck
+		textat(obstacles_x[10],obstacles_y[10], #arr_carl,8);	
+		textat(obstacles_x[11],obstacles_y[11], #arr_carr,8);
 		
 		// Crappy delay
 		shit_delay();
