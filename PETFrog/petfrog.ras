@@ -3,7 +3,7 @@ var
 
        	i,c: 	integer = 0; 
        	ch : 		byte = 0;
-		cs : 	cstring = "TRSE SPEAK PETSCII";     
+ 
 
 		rom4: 	cstring ="4.0 rom";
 		rom2: 	cstring ="2.0 rom";
@@ -13,6 +13,15 @@ const	KEYB: 	address = 151;	// Keys being pressed
 const	KEYBUF:	address = 158;	// Keyboard buffer
 
 KEYPRESS: byte = $FF;
+						//123456789012345678901234567890
+		by : 	cstring = "BY CHRIS GARRETT 01/2021  ";    
+		url: 	cstring = "@MAKERHACKS MAKERHACKS.COM"; 
+		over: 	cstring = "GAME OVER                 ";    
+		score: 	cstring = "YOU SCORED:               "; 
+		space: 	cstring = "PRESS SPACE TO CONTINUE   "; 
+		
+		ALIVE:byte=1;
+		WON_GAME:byte=0;   
 
 /*
 
@@ -45,6 +54,18 @@ str_truckt: cstring = "         ";
 
 crock_a_x: byte = 40;
 crock_b_x: byte = 1;
+
+logo: array[52] of byte = (
+//  1    2   3  4   5   6   7   8   9  10  11  12  13
+	114, 73,112,110,112,114,110, 85, 73, 32, 32, 32, 32, 
+	107, 75,107, 32, 32, 66, 32,107, 85, 85, 73, 85, 73, 
+	113, 32,109,125, 32,113, 32, 75,113, 74, 75, 74, 66, 
+	120,120,120,120,120,120,120,120,120,120,120, 74, 75, 
+);
+ 
+
+
+
 
 blank_river: cstring = "                           ";
 blank_road: array[12] of byte = (160,160,160,160,160,160,160,160,160);
@@ -144,12 +165,80 @@ begin
 	MemCpyFast( this_str, 0, zp, str_len ); 
 end;
 
-
+procedure title_screen();
 begin
-	DefineScreen();	
 	cls();
+	while (getkey()<>$20) do
+	begin
+
+	    MemCpyFast(#logo, 0, ^32768, 13 );  
+	    MemCpyFast(#logo, 13, ^32808, 13 );  
+	    MemCpyFast(#logo, 26, ^32848, 13 );  
+	    MemCpyFast(#logo, 39, ^32888, 13 );  
+
+		textat(0,6, #by,26);	
+		textat(0,7,#url,26);	
+		textat(0,10,#space,26);
+	end;
+	
+end;
+
+procedure score_screen();
+begin
+	cls();
+	while (getkey()<>$20) do
+	begin
+
+	    MemCpyFast(#logo, 0, ^32768, 13 );  
+	    MemCpyFast(#logo, 13, ^32808, 13 );  
+	    MemCpyFast(#logo, 26, ^32848, 13 );  
+	    MemCpyFast(#logo, 39, ^32888, 13 );  
+
+		textat(0,6, #over,26);	
+		textat(0,7,#score,26);	
+		textat(0,10,#space,26);
+	end;
+	
+end;
+
+procedure all_chars();
+begin
+	// Second doesn't
+	waitkey();
+	screen_char_loc:=$8000;
+	screenmemory:=$8000;
+	cls();
+
+	
+	screenmemory:=$8000+40;
+	if(peek(^50003,0) = 160) then
+	begin
+		textat(5,15,#rom4,7);
+	end; //4.0 ROMS
+	
+	if(peek(^50003,0) = 7) then
+	begin
+		textat(5,15,#rom2,8);
+	end; //2.0 ROMS
 	
 
+
+    // Loop through all PETSCII characters
+    fori i := 0 to 255 do
+    begin
+    		// Put the character at screen address
+        screen_char_loc[i] := i; 
+    end;
+    
+	textat(0,10,"1234567890123456789012345678901234567890",40);		
+
+	loop();
+
+end;
+
+procedure init_vars();
+begin
+	cls();
 	// Init the playfield
 	screenmemory := $8000;
 	MemCpy(#petscii1, 0, screenmemory, 240 ); 
@@ -180,7 +269,16 @@ begin
 	frog_x:=20;
 	frog_y:=10;
 	
-	while (KEYPRESS<>$20) do
+	KEYPRESS := 0;
+	ALIVE:=1;
+	WON_GAME:=0;
+end;
+
+procedure game_loop();
+begin
+	
+
+	while (ALIVE=1 and WON_GAME=0) do
 	begin
 		frog_old_x:=frog_x;
 		frog_old_y:=frog_y;
@@ -300,38 +398,20 @@ begin
 		wait($ffffff);
 	end;
 
+end;
 
+begin
+	DefineScreen();	
 
-	// Second doesn't
-	waitkey();
-	screen_char_loc:=$8000;
-	screenmemory:=$8000;
-	cls();
-
-	
-	screenmemory:=$8000+40;
-	if(peek(^50003,0) = 160) then
+	while(1) do
 	begin
-		textat(5,15,#rom4,7);
-	end; //4.0 ROMS
+		title_screen();
+		init_vars();
+		game_loop();
+		score_screen();
+	end;
+
 	
-	if(peek(^50003,0) = 7) then
-	begin
-		textat(5,15,#rom2,8);
-	end; //2.0 ROMS
-	
-
-
-    // Loop through all PETSCII characters
-    fori i := 0 to 255 do
-    begin
-    		// Put the character at screen address
-        screen_char_loc[i] := i; 
-    end;
-    
-	textat(0,10,"1234567890123456789012345678901234567890",40);		
-
-	loop();
 
 end.
 
