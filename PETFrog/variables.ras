@@ -12,6 +12,9 @@ const	KEYB: 	address = 151;	// Keys being pressed
 const	KEYBUF:	address = 158;	// Keyboard buffer
 //KEYD        0270-027A        624-633        Keyboard Buffer Queue (FIFO) $026f-$0278 on newer
 
+	PLAY_SOUND: byte=0;
+	GAME_SPEED: byte=6;
+
 KEYPRESS: byte = $FF;
 		  				// 123456789012345678901234567890
 		blk: 	cstring = "                            ";  
@@ -42,6 +45,7 @@ frogcharB: byte = 86;
 frog_x,frog_old_x: byte = 20;
 frog_y,frog_old_y: byte = 24;
 previous_tile: byte =32;
+	next_tile:byte;
 player_lives: byte=0;
 player_score: integer=0;
 
@@ -56,6 +60,17 @@ str_logl: cstring = "         ";
 
 arr_logr: array[5] of byte = ( 209,169,169,169, 169,);
 str_logr: cstring = "         ";
+
+arr_turtles: array[5] of byte = ( 81,81,81,81,81,);
+str_turtles: cstring = "         ";
+
+arr_river_r: array[5] of byte = ( 111,100,100,111,100,);
+str_river_r: cstring = "         ";
+
+arr_river_l: array[5] of byte = ( 32,100,111,100,100,);
+str_river_l: cstring = "         ";
+
+
 
 arr_carl: array[4] of byte = ( 240,207,208,224,);
 str_cart: cstring = "         ";
@@ -76,8 +91,8 @@ str_truckt_r: cstring = "         ";
 
  
 // WHERE ROWS START AND END                        
-obstacles_y: array[12] of byte = ( 4, 5, 6, 7, 12, 13, 15, 16, 18, 19, 21, 22);
-strip_direction: array[12] of byte = ( 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0);
+obstacles_y: array[13] of byte = ( 4, 5, 6, 7, 8, 12, 13, 15, 16, 18, 19, 21, 22);
+strip_direction: array[13] of byte = ( 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0);
 
 level_strips: array[2000] of byte = (
 );
@@ -89,8 +104,8 @@ blank_road: array[12] of byte = (160,160,160,160,160,160,160,160,160,160,160,160
 logo: array[52] of byte = (
 //  1    2   3  4   5   6   7   8   9  10  11  12  13
 	114, 73,112,110,112,114,110, 85, 73, 32, 32, 32, 32, 
-	107, 75,107, 32, 32, 66, 32,107, 85, 85, 73, 85, 73, 
-	113, 32,109,125, 32,113, 32, 75,113, 74, 75, 74, 66, 
+	107, 75,107, 32, 32, 93, 32,107, 85, 85, 73, 85, 73, 
+	113, 32,109,125, 32,113, 32, 75,113, 74, 75, 74, 93, 
 	120,120,120,120,120,120,120,120,120,120,120, 74, 75, 
 );
  
