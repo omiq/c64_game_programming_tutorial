@@ -31,39 +31,50 @@ KEYPRESS: byte = $FF;
 frogcharA: byte = 214;
 frogcharB: byte = 86;
 frog_x,frog_old_x: byte = 20;
-frog_y,frog_old_y: byte = 25;
+frog_y,frog_old_y: byte = 24;
 previous_tile: byte =32;
 
 
 arr_crockr: array[9] of byte = ( 192,162,220,220,220,220,220, 98,121,);
 str_crockr: cstring = "         ";
+
 arr_crockl: array[9] of byte = ( 121, 98,220,220,220,220,220,162,192,);
 str_crockl: cstring = "         ";
+
 arr_logl: array[5] of byte = ( 168,168,168,168,209,);
 str_logl: cstring = "         ";
+
 arr_logr: array[5] of byte = ( 209,169,169,169, 169,);
 str_logr: cstring = "         ";
+
 arr_carl: array[4] of byte = ( 240,207,208,224,);
-str_carl: cstring = "         ";
+str_cart: cstring = "         ";
 arr_carr: array[4] of byte = ( 237,215,215,160,);
-str_carr: cstring = "         ";
-arr_truckb: array[8] of byte = ( 160,215, 98,215,241,215,253,160,);
-str_truckb: cstring = "         ";
-arr_truckt: array[8] of byte = ( 224, 96, 96, 96,254,235,238,224,);
-str_truckt: cstring = "         ";
+str_carb: cstring = "         ";
 
-//                                1   2  3  4  5  6  7  8  9  0  1  2 
-obstacles_x: array[12] of byte = (30, 0,30, 0,0,0,30,30,30,30, 0, 0);
-obstacles_y: array[12] of byte = ( 4, 5, 7, 8,18,19,21,22,15,16,12,13);
-
-/*
-obstacles_x: array[8] of byte = (40, 0,40, 0,40,40, 0, 0);
-obstacles_y: array[8] of byte = ( 7, 8, 9,11,17,18,20,21);
-*/
+arr_truckb_l: array[8] of byte = ( $F0,$F3,$FC,$60,$60,$60,);
+str_truckb_l: cstring = "         ";
+arr_truckt_l: array[8] of byte = ( $ED,$D7,$F1,$D7,$62,$D7,);
+str_truckt_l: cstring = "         ";
 
 
-crock_a_x: byte;
+arr_truckb_r: array[8] of byte = ( 160,215, 98,215,241,215,253,160,);
+str_truckb_r: cstring = "         ";
+arr_truckt_r: array[8] of byte = ( 224, 96, 96, 96,254,235,238,224,);
+str_truckt_r: cstring = "         ";
 
+
+ 
+// WHERE ROWS START AND END                        
+obstacles_y: array[12] of byte = ( 4, 5, 6, 7, 12, 13, 15, 16, 18, 19, 21, 22);
+strip_direction: array[12] of byte = ( 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0);
+
+level_strips: array[2000] of byte = (
+);
+
+obstacles_x_rl,obstacles_x_lr: byte;
+blank_river: cstring = "                           ";
+blank_road: array[12] of byte = (160,160,160,160,160,160,160,160,160,160,160,160);
 
 logo: array[52] of byte = (
 //  1    2   3  4   5   6   7   8   9  10  11  12  13
@@ -104,47 +115,42 @@ $66,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$66,$66,$66,$66,$20,
 
 
 
-blank_river: cstring = "                           ";
-blank_road: array[12] of byte = (160,160,160,160,160,160,160,160,160);
+
 petscii_pointer: pointer;
 
 /*
 1   2   3   4   5   6   7   8   9   0   1   2   3   4   5   6   7   8   9   20  1   2   3   4   5   6   7   8   9   30  1   2   3   4   5   6   7   8   9   40   
 */
-level1: array[240] of byte = (
+level1: array[1000] of byte = (
 $CF,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$F7,$D0,
 $F4,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$90,$85,$94,$86,$92,$8F,$87,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$EA,
 $F4,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$EA,
 $CC,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$EF,$FA,
 $E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,$E6,$E6,$E6,$20,$E6,$E6,
 $E6,$E6,$20,$20,$20,$20,$E6,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$20,$20,$20,$20,$E6,$E6,$20,$20,$20,$20,$E6,
-
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$C0,$A2,$DC,$DC,$DC,$DC,$DC,$62,$79,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$A8,$A8,$A8,$A8,$A8,$A8,$D1,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$79,$62,$DC,$DC,$DC,$DC,$DC,$A2,$C0,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$D1,$A9,$A9,$A9,$A9,$20,$20,$20,$56,$20,$20,$20,$20,$20,$20,$20,$20,$D1,$A9,$A9,$A9,$A9,$20,$20,$20,
-
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $68,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$68,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$20,$20,$20,$20,$20,$20,
 $E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$68,
 $E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,
 $E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,
 $E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$F0,$CF,$D0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$F0,$CF,$D0,$E0,$E0,$E0,$E0,$F0,$CF,$D0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,
-
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$ED,$D7,$D7,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$ED,$D7,$D7,$A0,$A0,$A0,$A0,$ED,$D7,$D7,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,
 $E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$60,$60,$60,$FE,$EB,$EE,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$E0,$A0,$A0,$A0,
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$D7,$62,$D7,$F1,$D7,$FD,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,
 $E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,
-
 $E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$D6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6,$E6
 );
 	
 
-level2: array[240] of byte = (
+level2: array[1000] of byte = (
 $CC,$EF,$FA,$13,$03,$0F,$12,$05,$3A,$39,$39,$39,$CC,$EF,$EF,$EF,$A0,$90,$85,$94,$86,$92,$8F,$87,$A0,$EF,$EF,$EF,$EF,$FA,$0C,$09,$16,$05,$13,$3A,$33,$CC,$EF,$FA,
 $20,$68,$68,$20,$68,$68,$68,$68,$68,$68,$20,$68,$68,$68,$68,$68,$68,$68,$20,$68,$68,$68,$68,$68,$68,$68,$68,$68,$68,$68,$68,$20,$68,$68,$68,$68,$68,$20,$68,$20,
 $66,$5C,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$20,$66,$66,$66,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$66,$66,$20,$20,$20,$20,$5C,
@@ -156,13 +162,13 @@ $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,
 $66,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$68,$68,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$68,$68,$68,$20,$20,$20,$20,$68,$66,
-$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,$66,
-$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,$E3,
+$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,
+$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
-$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,$E2,
+$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C3,
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,$A0,
 $AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,$AD,
@@ -269,79 +275,72 @@ begin
 	
 end;
 
-procedure all_chars();
+procedure sprite_xy(spr_x: byte; spr_y: byte; source_str: pointer; spr_len: byte );
+var 
+	spr_p : pointer;
+
 begin
-	// Second doesn't
-	waitkey();
-	screen_char_loc:=$8000;
-	screenmemory:=$8000;
-	cls();
-
-	
-	screenmemory:=$8000+40;
-	if(peek(^50003,0) = 160) then
-	begin
-		textat(5,15,#rom4,7);
-	end; //4.0 ROMS
-	
-	if(peek(^50003,0) = 7) then
-	begin
-		textat(5,15,#rom2,8);
-	end; //2.0 ROMS
-	
-
-
-    // Loop through all PETSCII characters
-    fori i := 0 to 255 do
-    begin
-    		// Put the character at screen address
-        screen_char_loc[i] := i; 
-    end;
-    
-	textat(0,10,"1234567890123456789012345678901234567890",40);		
-
-	loop();
-
+	spr_p:= #level_strips + spr_y*80 + spr_x;
+	MemCpyFast( source_str, 0, spr_p, spr_len ); 
+	spr_p:= #level_strips + spr_y*80 + spr_x+40;
+	MemCpyFast( source_str, 0, spr_p, spr_len ); 
 end;
 
 procedure init_vars();
+var
+	this_row,target_strip:pointer;
+	iteration:byte;
 begin
 	cls();
+	
 	// Init the playfield
-	
 	screenmemory := $8000;
-	
-/*
-	MemCpy(#petscii1, 0, screenmemory, 240 ); 
-	screenmemory:=$8000+240;
-	MemCpy(#petscii2, 0, screenmemory, 240 ); 
-	screenmemory:=$8000+480;
-	MemCpy(#petscii3, 0, screenmemory, 240 ); 
-	screenmemory:=$8000+720;
-	MemCpy(#petscii4, 0, screenmemory, 240 ); 
-	screenmemory:=$8000+960;
-	MemCpy(#petscii5, 0, screenmemory, 40 ); 
-	screenmemory := $8000;
-*/
-
 	petscii_pointer:=#level2;
 	CopyFullScreen(petscii_pointer, #screenmemory);
+	this_row:=petscii_pointer;
+	target_strip:=#level_strips;
 
-				
-						
+	// Obstacle Blanks
+	fori iteration:= 1 to 25 do
+	begin
+		// Copy the source twice
+		MemCpyFast(this_row, 0, #target_strip, 40);
+		target_strip:=target_strip+40;
+		MemCpyFast(this_row, 0, #target_strip, 40);
+		target_strip:=target_strip+40;
+		
+		// Next row
+		this_row:=this_row+40;
+	end;
+							
 
 	// Init the "sprites"
 	MemCpy(#arr_crockr, 0, #str_crockr, 9 ); 
 	MemCpy(#arr_crockl, 0, #str_crockl, 9 ); 
 	MemCpy(#arr_logl, 0, #str_logl, 5 ); 
 	MemCpy(#arr_logr, 0, #str_logr, 5 ); 
-	MemCpy(#arr_truckt, 0, #str_truckt, 8 ); 
-	MemCpy(#arr_truckb, 0, #str_truckb, 8 ); 
-	MemCpy(#arr_carl, 0, #str_carl, 4 ); 
-	MemCpy(#arr_carr, 0, #str_carr, 4 ); 
+	MemCpy(#arr_truckt_r, 0, #str_truckt_r, 8 ); 
+	MemCpy(#arr_truckb_r, 0, #str_truckb_r, 8 ); 
+	MemCpy(#arr_carl, 0, #str_cart, 4 ); 
+	MemCpy(#arr_carr, 0, #str_carb, 4 ); 
 
-	frog_x:=20;
-	frog_y:=10;
+	// Sprite start positions
+	sprite_xy(10,obstacles_y[0],#str_crockr,9);
+	sprite_xy(30,obstacles_y[1],#str_crockl,9);
+	sprite_xy(04,obstacles_y[2],#str_logr,5);
+	sprite_xy(24,obstacles_y[3],#str_logl,5);
+	sprite_xy(34,obstacles_y[4],#str_cart,4);
+	sprite_xy(34,obstacles_y[5],#str_carb,4);
+	sprite_xy(19,obstacles_y[6],#str_cart,4);
+	sprite_xy(19,obstacles_y[7],#str_carb,4);
+	sprite_xy(10,obstacles_y[8],#str_truckt_r,8);
+	sprite_xy(10,obstacles_y[9],#str_truckb_r,8);
+	sprite_xy(19,obstacles_y[10],#str_truckt_r,8);
+	sprite_xy(19,obstacles_y[11],#str_truckb_r,8);
+
+
+	frog_x:= 20;
+	frog_y:= 24;
 	
 	KEYPRESS := 0;
 	ALIVE:=1;
@@ -377,6 +376,42 @@ begin
 		wait($ffffff);
 end;
 
+procedure show_obstacles();
+var
+	
+	strip_num,this_strip:byte;
+	this_source_offset:pointer;
+begin
+
+	// TRSE way of incrementing 
+	// counter with loop back to 0
+	incRange(obstacles_x_rl, 0, 39);
+	obstacles_x_lr:=40-obstacles_x_rl;
+
+	for strip_num := 0 to 12 do
+	begin
+		this_strip:=obstacles_y[strip_num];
+		screenmemory:=$8000+(this_strip*40);
+
+		this_source_offset:=#level_strips+(this_strip*80);
+		
+		if(strip_direction[strip_num]=1) then
+		begin
+			this_source_offset:=this_source_offset+obstacles_x_rl;
+		end
+		else
+		begin
+			this_source_offset:=this_source_offset+obstacles_x_lr;
+		end;
+		
+		MemCpyFast(this_source_offset, 0, screenmemory, 40); 
+	end;
+
+	// RESET SCREEN MEMORY
+	screenmemory := $8000;
+
+end;
+
 procedure game_loop();
 begin
 	
@@ -390,20 +425,6 @@ begin
 		// Uncomment to show key that was pressed
 		// textat(30,20, #KEYPRESS,1);
 		
-		// Undraw "sprites"
-		textat(obstacles_x[0],obstacles_y[0], #blank_river,9);  // crock
-		textat(obstacles_x[1],obstacles_y[1], #blank_river,9);  // crock	
-		textat(obstacles_x[2],obstacles_y[2], #blank_river,5);  // log
-		textat(obstacles_x[3],obstacles_y[3], #blank_river,5);	  // log
-		textat(obstacles_x[4],obstacles_y[4], #blank_road,4);	  // car	
-		textat(obstacles_x[5],obstacles_y[5], #blank_road,4);	  // car
-		textat(obstacles_x[6],obstacles_y[6], #blank_road,8);	  // truck
-		textat(obstacles_x[7],obstacles_y[7], #blank_road,8);	  // truck
-		textat(obstacles_x[8],obstacles_y[8], #blank_road,4);	  // car
-		textat(obstacles_x[9],obstacles_y[9], #blank_road,4);	  // car
-		textat(obstacles_x[10],obstacles_y[10], #blank_road,8);// truck	
-		textat(obstacles_x[11],obstacles_y[11], #blank_road,8);// truck	
-
 		if(KEYPRESS=184) then
 		begin
 			if(frog_y>1) then
@@ -444,7 +465,7 @@ begin
 		end;	
 		
 		// draw the frog because things might have changed onscreen
-		if(frog_y>16) then
+		if(frog_y>10) then
 		begin
 			textat(frog_x,frog_y, #frogcharA,1);	
 		end
@@ -453,25 +474,8 @@ begin
 			textat(frog_x,frog_y, #frogcharB,1);	
 		end;
 
-
-
-		// TRSE way of incrementing 
-		// counter with loop back to 0
-		incRange(crock_a_x, 0, 40);
-
-		// Draw "sprites"	
-		textat(obstacles_x[0],obstacles_y[0], #str_crockr,9);
-		textat(obstacles_x[1],obstacles_y[1], #str_crockl,9);	
-		textat(obstacles_x[2],obstacles_y[2], #str_logr,5);
-		textat(obstacles_x[3],obstacles_y[3], #str_logl,5);	
-		textat(obstacles_x[4],obstacles_y[4], #arr_carl,4);
-		textat(obstacles_x[5],obstacles_y[5], #arr_carr,4);
-		textat(obstacles_x[6],obstacles_y[6], #arr_truckt,8);// truck
-		textat(obstacles_x[7],obstacles_y[7], #arr_truckb,8);// truck	
-		textat(obstacles_x[8],obstacles_y[8], #arr_truckt,8);// truck
-		textat(obstacles_x[9],obstacles_y[9], #arr_truckb,8);// truck
-		textat(obstacles_x[10],obstacles_y[10], #arr_carl,8);	
-		textat(obstacles_x[11],obstacles_y[11], #arr_carr,8);
+		// Show the obstacles in new positions
+		show_obstacles();
 		
 		// Crappy delay
 		shit_delay();
