@@ -1,0 +1,13 @@
+; labels
+al  $400 .StartBlock400
+al  $410 .EndBlock400
+al  $413 .note_duration
+al  $414 .note
+al  $415 .PlayNote_block2
+al  $420 .PlayNote_forloop3
+al  $425 .PlayNote_forloopcounter5
+al  $42f .PlayNote_loopdone8
+al  $430 .Burp
+al  $448 .block1
+al  $44b .EndBlock410
+; breakpoints

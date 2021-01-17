@@ -190,7 +190,7 @@ begin
     end;
 
 	
-	moveto(2,20,hi(#$8000));
+	moveto(0,12,hi(#$8000));
 	if(peek(^50003,0) = 160) then
 	begin
 		printnumber(4);

@@ -548,11 +548,11 @@ MainProgram_loopdone28: ;keep
 MainProgram_forloopend24
 	; LineNumber: 193
 	; MoveTo optimization
-	lda #$42
+	lda #$c0
 	sta screenmemory
 	lda #>$8000
 	clc
-	adc #$06
+	adc #$03
 	sta screenmemory+1
 	; LineNumber: 194
 	; Binary clause Simplified: EQUALS
