@@ -1,5 +1,6 @@
 program PETFrog;
 var  
+		oldti,ti: byte at $8f;			// Jiffy timer ($0200- $0202 on older??)
 
        	i,c: 	integer = 0; 
        	ch : 		byte = 0;
@@ -11,6 +12,7 @@ var
 
 const	KEYB: 	address = 151;	// Keys being pressed
 const	KEYBUF:	address = 158;	// Keyboard buffer
+//KEYD        0270-027A        624-633        Keyboard Buffer Queue (FIFO) $026f-$0278 on newer
 
 KEYPRESS: byte = $FF;
 		  				// 123456789012345678901234567890
@@ -322,6 +324,7 @@ procedure init_vars();
 var
 	this_row,target_strip:pointer;
 	iteration:byte;
+	homeplate:byte=211;
 begin
 	cls();
 	
@@ -380,35 +383,25 @@ begin
 	
 	player_lives:=3;
 	player_score:=0;
+	
+	// Home plates
+	textat(3,1,#homeplate,1);
+	textat(10,1,#homeplate,1);
+	textat(18,1,#homeplate,1);
+	textat(24,1,#homeplate,1);
+	textat(31,1,#homeplate,1);
+	textat(37,1,#homeplate,1);
 end;
 
 procedure shit_delay();
+var 
+	temp_delay: byte;
 begin
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);	
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);		
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
-		wait($ffffff);
+		fori temp_delay := 1 to 3 do
+		begin
+	        while ( ti = oldti ) do begin end;
+	        oldti := ti;
+	    end;
 end;
 
 procedure show_obstacles();
@@ -447,9 +440,120 @@ begin
 
 end;
 
-procedure game_loop();
+procedure kill_frog();
+begin
+
+	frog_x:= 20;
+	frog_y:= 24;
+    frog_old_x:=frog_x;        
+    frog_old_y:=frog_y;	
+	dec(player_lives);
+end;
+
+procedure check_collisions();
 var
 	next_tile:byte;
+begin
+		// CHECK COLLISSIONS
+		next_tile := getat(frog_x,frog_y);
+
+
+		// There is no function to search a string
+		// or check an array, or return array size,
+		// so we need to check each character individually
+		case next_tile of
+		// Scenery
+	        $66: 
+	        	  begin
+	        	  	if(frog_y<24) then
+	        	  	begin
+		             frog_x:=frog_old_x;
+		             frog_y:=frog_old_y;
+		        end;
+	           end;
+
+	        $68: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	           end;
+	           
+	        $5c: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	           end;
+
+		// Truck!
+	        $F0: 
+	        	  begin
+				kill_frog();
+	           end;
+
+	        $ED: 
+	        	  begin
+				kill_frog();
+
+	           end;
+	        $EE: 
+	        	  begin
+				kill_frog();
+
+	           end;
+
+	        $FD: 
+	        	  begin
+				kill_frog();
+
+	           end;
+
+		// Crock!
+			198: 
+	        	  begin
+				kill_frog();
+					
+	           end;
+
+			162: 
+	        	  begin
+				kill_frog();
+	           end;
+
+		// HOME
+			// Occupied
+			214: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	           end;
+			// Success
+			211: 
+	        	  begin
+	        	  	if(frog_x<>frog_old_x or frog_y<>frog_old_y ) then
+				begin
+					player_score:=player_score+100;
+					frog_x:= 20;
+					frog_y:= 24;
+					frog_old_x:=frog_x;
+					frog_old_y:=frog_y;
+				end;
+	           end;
+
+
+	    else
+	    begin
+	       // None of the cases were valid so go ahead
+	       if(KEYPRESS<>255) then
+			begin
+				inc(player_score);
+			end;
+	    end;
+end;
+
+
+
+procedure game_loop();
+
 begin
 	
 
@@ -494,70 +598,11 @@ begin
 			end;
 		end;
 		
-		// CHECK COLLISSIONS
-		next_tile := getat(frog_x,frog_y);
+		// Show the obstacles in new positions
+		show_obstacles();
 		
-		// There is no function to search a string
-		// or check an array, or return array size,
-		// so we need to check each character individually
-		case next_tile of
-		// Scenery
-	        $66: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-	           end;
-
-	        $68: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-	           end;
-	           
-	        $5c: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-	           end;
-
-		// Truck!
-	        $F0: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-	             dec(player_lives);
-	           end;
-
-	        $ED: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-    	             dec(player_lives);
-	           end;
-	        $EE: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-	             dec(player_lives);
-	           end;
-
-	        $FD: 
-	        	  begin
-	             frog_x:=frog_old_x;
-	             frog_y:=frog_old_y;
-    	             dec(player_lives);
-	           end;
-
-
-
-	    else
-	    begin
-	       // None of the cases were valid so go ahead
-	       if(KEYPRESS<>255) then
-			begin
-				inc(player_score);
-			end;
-	    end;
+		// "Collision detection"
+		check_collisions();
 
 		// Still alive?
 		if(player_lives<1) then
@@ -566,6 +611,8 @@ begin
 			ALIVE:=0;
 				
 		end;	
+
+
 
 		// only undraw if different
 		if(frog_x<>frog_old_x or frog_y<>frog_old_y ) then
@@ -584,9 +631,8 @@ begin
 			textat(frog_x,frog_y, #frogcharB,1);	
 		end;
 
-		// Show the obstacles in new positions
-		show_obstacles();
 
+		
 		// Score and lives
 		numberat(9,0,player_score,3);		
 		numberat(36,0,player_lives,1);		
