@@ -1,0 +1,34 @@
+; labels
+al  $410 .EndBlock400
+al  $400 .StartBlock400
+al  $413 .num
+al  $415 .divide16x8
+al  $41d .divloop16
+al  $437 .skip16
+al  $43b .div8x8_procedure
+al  $440 .div8x8_loop1
+al  $449 .div8x8_loop2
+al  $450 .div8x8_def_end
+al  $454 .SetScreenPosition
+al  $45e .syloop
+al  $465 .sskip
+al  $468 .sydone
+al  $473 .sxdone
+al  $476 .initmoveto_moveto2
+al  $477 .print_number_text
+al  $47c .printstring
+al  $47e .printstringloop
+al  $48b .printstring_skip
+al  $496 .printstring_done
+al  $497 .block1
+al  $49b .MainProgram_clearloop3
+al  $4f0 .MainProgram_printnumber_l15
+al  $500 .MainProgram_printnumber_l26
+al  $543 .MainProgram_modulo11
+al  $557 .MainProgram_printnumber_l18
+al  $567 .MainProgram_printnumber_l29
+al  $597 .MainProgram_modulo16
+al  $5ab .MainProgram_printnumber_l113
+al  $5bb .MainProgram_printnumber_l214
+al  $5d3 .EndBlock410
+; breakpoints
