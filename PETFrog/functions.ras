@@ -76,19 +76,30 @@ end;
 // =========================================
 // SOUND!
 
-procedure PlayNote(note : byte);
+procedure PlayNote(note : byte, note_len : byte);
 var
  note_duration: byte;
 begin
 	SOUND_FREQ := note;
-	for note_duration:=0 to 100 do wait(200);
+	for note_duration:=0 to note_len do wait(200);
 end;
 
 procedure burp();
 begin
 	SOUND_OCTAVE := 15;
 	SOUND := SOUND_ON;
-	PlayNote(238);
+	PlayNote(238,255);
+	SOUND := SOUND_OFF;
+end;
+
+procedure ping();
+begin
+	SOUND_OCTAVE := 85;
+	SOUND := SOUND_ON;
+	PlayNote(238,200);
+	PlayNote(251,200);
+	PlayNote(210,255);
+	PlayNote(210,255);
 	SOUND := SOUND_OFF;
 end;
 
@@ -322,7 +333,12 @@ begin
 				kill_frog();
 	           end;
 
-	        $ED: 
+	        215: 
+	        	  begin
+				kill_frog();
+	           end;
+
+            $ED: 
 	        	  begin
 				kill_frog();
 
@@ -364,6 +380,7 @@ begin
 	        	  	if(frog_x<>frog_old_x or frog_y<>frog_old_y ) then
 				begin
 					player_score:=player_score+100;
+					ping();
 					frog_x:= 20;
 					frog_y:= 24;
 					frog_old_x:=frog_x;
