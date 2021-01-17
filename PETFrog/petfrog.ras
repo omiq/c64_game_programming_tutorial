@@ -256,7 +256,7 @@ begin
 
 
 	num_p:= $8000 + num_y*40 + num_x;
-	MemCpyFast( #num_str, 0, num_p, num_len ); 
+	MemCpy( #num_str, 0, num_p, num_len ); 
 end;
 
 
@@ -300,7 +300,8 @@ begin
 	    MemCpyFast(#logo, 39, ^32888, 13 );  
 
 		textat(2,6, #over,28);	
-		textat(2,7,#score,28);	
+		textat(2,7,#score,28);
+		numberat(15,7,player_score,3);	
 		textat(2,10,#space,28);
 	end;
 	
@@ -378,7 +379,7 @@ begin
 	WON_GAME:=0;
 	
 	player_lives:=3;
-	player_score:=321;
+	player_score:=0;
 end;
 
 procedure shit_delay();
@@ -447,6 +448,8 @@ begin
 end;
 
 procedure game_loop();
+var
+	next_tile:byte;
 begin
 	
 
@@ -490,6 +493,79 @@ begin
 				dec(frog_x);
 			end;
 		end;
+		
+		// CHECK COLLISSIONS
+		next_tile := getat(frog_x,frog_y);
+		
+		// There is no function to search a string
+		// or check an array, or return array size,
+		// so we need to check each character individually
+		case next_tile of
+		// Scenery
+	        $66: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	           end;
+
+	        $68: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	           end;
+	           
+	        $5c: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	           end;
+
+		// Truck!
+	        $F0: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	             dec(player_lives);
+	           end;
+
+	        $ED: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+    	             dec(player_lives);
+	           end;
+	        $EE: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+	             dec(player_lives);
+	           end;
+
+	        $FD: 
+	        	  begin
+	             frog_x:=frog_old_x;
+	             frog_y:=frog_old_y;
+    	             dec(player_lives);
+	           end;
+
+
+
+	    else
+	    begin
+	       // None of the cases were valid so go ahead
+	       if(KEYPRESS<>255) then
+			begin
+				inc(player_score);
+			end;
+	    end;
+
+		// Still alive?
+		if(player_lives<1) then
+		begin
+			// Dead and didn't win :(
+			ALIVE:=0;
+				
+		end;	
 
 		// only undraw if different
 		if(frog_x<>frog_old_x or frog_y<>frog_old_y ) then

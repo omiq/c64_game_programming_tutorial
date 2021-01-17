@@ -1,7 +1,7 @@
-program MyProgram;
+program EffingMath;
 var  
 
-	num:integer=123;
+	num:integer=321;
 begin
 
 	DefineScreen();	
@@ -11,13 +11,13 @@ begin
 	screenmemory:=$8000;
 	
 	moveto(0,0,hi(screen_char_loc));
-	printnumber(num/100);
+	printdecimal(num/100,1);
 
 	moveto(0,2,hi(screen_char_loc));
-	printnumber(mod(num/10,10));
+	printdecimal(mod(num/10,10),1);
 
 	moveto(0,4,hi(screen_char_loc));
-	printnumber(mod(num,10));
+	printdecimal(mod(num,10),1);
 
 
 end.

@@ -10,11 +10,11 @@ EndBlock400
 	org $410
 	; Starting new memory block at $410
 StartBlock410
-MyProgram
+EffingMath
 	; LineNumber: 5
 	jmp block1
 	; LineNumber: 4
-num	dc.w	$7b
+num	dc.w	$141
 	; NodeProcedureDecl -1
 	; ***********  Defining procedure : init16x8div
 	;    Procedure type : Built-in function
@@ -103,28 +103,25 @@ sxdone
 initmoveto_moveto2
 	rts
 	; NodeProcedureDecl -1
-	; ***********  Defining procedure : initprintstring
-	;    Procedure type : User-defined procedure
-print_text = $4c
-print_number_text .dc "    ",0
-printstring
-	ldy #0
-printstringloop
-	lda (print_text),y
-	cmp #0 ;keep
-	beq printstring_done
-	cmp #64
-	bcc printstring_skip
-	sec
-	sbc #64
-printstring_skip
-	sta (screenmemory),y
-	iny
+	; ***********  Defining procedure : initprintdecimal
+	;    Procedure type : Built-in function
+	;    Requires initialization : no
+ipd_div_hi dc.b 0
+ipd_div_lo dc.b 0
+init_printdecimal_div10
+	ldx #$11
+	lda #$00
+	clc
+init_printdecimal_loop
+	rol
+	cmp #$0A
+	bcc init_printdecimal_skip
+	sbc #$0A
+init_printdecimal_skip
+	rol ipd_div_lo
+	rol ipd_div_hi
 	dex
-	cpx #0
-	beq printstring_done
-	jmp printstringloop
-printstring_done
+	bne init_printdecimal_loop
 	rts
 block1
 	; LineNumber: 6
@@ -163,7 +160,6 @@ MainProgram_clearloop3
 	adc #$00
 	sta screenmemory+1
 	; LineNumber: 14
-	ldx #0
 	; Right is PURE NUMERIC : Is word =1
 	; 16x8 div
 	; integer assignment NodeVar
@@ -176,38 +172,17 @@ MainProgram_clearloop3
 	sta initdiv16x8_divisor
 	sty initdiv16x8_divisor+1
 	jsr divide16x8
-	ldy initdiv16x8_dividend ; optimized, look out for bugs
-	and #$F0
-	lsr
-	lsr 
-	lsr 
-	lsr 
-	cmp #$0A
-	bcc MainProgram_printnumber_l15
-	sec
-	sbc #$39
-MainProgram_printnumber_l15
-	adc #$30 + #64
-	sta print_number_text,x
-	inx
-	tya
-	and #$0F
-	cmp #$0A
-	bcc MainProgram_printnumber_l26
-	sec
-	sbc #$39
-MainProgram_printnumber_l26
-	adc #$30 + #64
-	sta print_number_text,x
-	inx
-	lda #0
-	sta print_number_text,x
-	ldx #0
-	lda #<print_number_text
-	ldy #>print_number_text
-	sta print_text+0
-	sty print_text+1
-	jsr printstring
+	lda initdiv16x8_dividend
+	ldy initdiv16x8_dividend+1
+	sta ipd_div_lo
+	sty ipd_div_hi
+	ldy #$1 ; optimized, look out for bugs
+MainProgram_printdecimal4
+	jsr init_printdecimal_div10 
+	ora #$30
+	sta (screenmemory),y
+	dey
+	bpl MainProgram_printdecimal4
 	; LineNumber: 16
 	; MoveTo optimization
 	lda #$a0
@@ -217,11 +192,11 @@ MainProgram_printnumber_l26
 	adc #$00
 	sta screenmemory+1
 	; LineNumber: 17
-	ldx #0
+	ldy #0
 	; Modulo
 	lda #$a
-MainProgram_val_var10 = $54
-	sta MainProgram_val_var10
+MainProgram_val_var6 = $54
+	sta MainProgram_val_var6
 	; Right is PURE NUMERIC : Is word =1
 	; 16x8 div
 	; integer assignment NodeVar
@@ -237,42 +212,19 @@ MainProgram_val_var10 = $54
 	lda initdiv16x8_dividend
 	ldy initdiv16x8_dividend+1
 	sec
-MainProgram_modulo11
-	sbc MainProgram_val_var10
-	bcs MainProgram_modulo11
-	adc MainProgram_val_var10
-	tay
-	and #$F0
-	lsr
-	lsr 
-	lsr 
-	lsr 
-	cmp #$0A
-	bcc MainProgram_printnumber_l18
-	sec
-	sbc #$39
-MainProgram_printnumber_l18
-	adc #$30 + #64
-	sta print_number_text,x
-	inx
-	tya
-	and #$0F
-	cmp #$0A
-	bcc MainProgram_printnumber_l29
-	sec
-	sbc #$39
-MainProgram_printnumber_l29
-	adc #$30 + #64
-	sta print_number_text,x
-	inx
-	lda #0
-	sta print_number_text,x
-	ldx #0
-	lda #<print_number_text
-	ldy #>print_number_text
-	sta print_text+0
-	sty print_text+1
-	jsr printstring
+MainProgram_modulo7
+	sbc MainProgram_val_var6
+	bcs MainProgram_modulo7
+	adc MainProgram_val_var6
+	sta ipd_div_lo
+	sty ipd_div_hi
+	ldy #$1 ; optimized, look out for bugs
+MainProgram_printdecimal5
+	jsr init_printdecimal_div10 
+	ora #$30
+	sta (screenmemory),y
+	dey
+	bpl MainProgram_printdecimal5
 	; LineNumber: 19
 	; MoveTo optimization
 	lda #$40
@@ -282,51 +234,28 @@ MainProgram_printnumber_l29
 	adc #$01
 	sta screenmemory+1
 	; LineNumber: 20
-	ldx #0
+	ldy #0
 	; Modulo
 	lda #$a
-MainProgram_val_var15 = $54
-	sta MainProgram_val_var15
+MainProgram_val_var9 = $54
+	sta MainProgram_val_var9
 	; integer assignment NodeVar
 	ldy num+1 ; Next one
 	lda num
 	sec
-MainProgram_modulo16
-	sbc MainProgram_val_var15
-	bcs MainProgram_modulo16
-	adc MainProgram_val_var15
-	tay
-	and #$F0
-	lsr
-	lsr 
-	lsr 
-	lsr 
-	cmp #$0A
-	bcc MainProgram_printnumber_l113
-	sec
-	sbc #$39
-MainProgram_printnumber_l113
-	adc #$30 + #64
-	sta print_number_text,x
-	inx
-	tya
-	and #$0F
-	cmp #$0A
-	bcc MainProgram_printnumber_l214
-	sec
-	sbc #$39
-MainProgram_printnumber_l214
-	adc #$30 + #64
-	sta print_number_text,x
-	inx
-	lda #0
-	sta print_number_text,x
-	ldx #0
-	lda #<print_number_text
-	ldy #>print_number_text
-	sta print_text+0
-	sty print_text+1
-	jsr printstring
+MainProgram_modulo10
+	sbc MainProgram_val_var9
+	bcs MainProgram_modulo10
+	adc MainProgram_val_var9
+	sta ipd_div_lo
+	sty ipd_div_hi
+	ldy #$1 ; optimized, look out for bugs
+MainProgram_printdecimal8
+	jsr init_printdecimal_div10 
+	ora #$30
+	sta (screenmemory),y
+	dey
+	bpl MainProgram_printdecimal8
 	; LineNumber: 23
 	; End of program
 	; Ending memory block
