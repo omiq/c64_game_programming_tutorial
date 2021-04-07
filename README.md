@@ -1,4 +1,4 @@
-# Commdore C64 programming [Maker Hacks tutorial](https://makerhacks.com) and **XC=Basic** C64 Text Adventure engine
+# Commdore C64 programming [tutorial](https://retrogamecoders.com) and **XC=Basic** C64 Text Adventure engine
 
 ## bat and ball sprite game demo
 ![batball.png](batball.png)
