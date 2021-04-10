@@ -15,6 +15,9 @@
 * c64-text-adventure.prg is the currently compiled game
 * c64-text-adventure.bas is the XC=Basic code as it currently stands
 
+You can try this demo in your web browser here:
+https://retrogamecoders.com/c64-emulator/?disk=c64-text-adventure.prg&nocache
+
 
 
 ## Also
