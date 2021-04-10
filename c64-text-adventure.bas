@@ -14,7 +14,7 @@ include "bits.bas"
 
 
 proc initialise
-  let \_debug!=1            ; for outputting debug code - future add teleport etc commands
+  let \_debug!=0            ; for outputting debug code - future add teleport etc commands
   let \_moves=0             ; move counter - integer because in theory a game could be > 255
   let \won_the_game! = 0    ; did they win?
   let \is_alive! = 1        ; are they dead?
@@ -168,12 +168,18 @@ endproc
 
 proc start_screen
 
-  print "{CLR}";
-  print "an adventure game"
-  print "by chris garrett"
+  print "{CLR}{DOWN}{DOWN}{DOWN}";
+        ;01234567890123456789012345678901234567890
   print ""
-  print "you're welcome!"
+  print "{WHITE}     an adventure game engine demo{LIGHT_GRAY}"
+  print "            by chris garrett"
   print ""
+  print "  @retrogamecoders retrogamecoders.com"
+  print "{DOWN}{DOWN}"
+  print "{WHITE}   built using xc=basic xcbasic.net{LIGHT_GRAY}"
+  print "            by fekete csaba"
+  print ""
+  print "         ";
   call wait_key
   
 endproc
@@ -636,7 +642,9 @@ proc process_instruction
   if strcmp(\instr$,"help")=0 then
   
       instruction_ok = 1
-      print "instructions"
+      print "{REV_ON}instructions{REV_OFF}"
+      print ""
+      print "verbs: get,take,look,examine,go,n,s,e,w,u,d,drop,use,wear,quit,help"
       call wait_key
   
   endif
