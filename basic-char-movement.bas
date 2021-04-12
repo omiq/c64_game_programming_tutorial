@@ -1,5 +1,5 @@
 10 rem Put PETSCII text at screen coords
-20 print "{clear}{home}{right*4}{down*12}{cyan}press keys: q,a,o,p{white}"
+20 print "{clear}{home}{right}{right}{down}{down}{down}{down}{cyan}press keys: q,a,o,p{white}"
 30 rem init vars + set initial position
 40 let col=20 : let row=10 : let a=0
 45 rem                                                the screen 'map' 
@@ -49,8 +49,11 @@
 2080 if col > 39 then col=39
 2090 if row < 0 then row=0
 2100 if row > 23 then row=23
-2110 return
-2120 rem                                 
+2110 if peek(1024+(row*40)+col)=32 then return
+2120 rem don't move if not to a space
+2130 row=oy : col=ox
+2140 return
+2920 rem                                 
 3000 rem set cursor row and column
 3010 x=row : y=col
 3020 poke 780,a : rem set a register 
