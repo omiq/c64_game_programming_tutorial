@@ -31,6 +31,11 @@ sub init_maze()
     maze(x+1,y-4) = 1
     maze(x-1,y-4) = 1
 
+    maze(x,y-1) = 0
+    maze(x,y-2) = 0
+    maze(x,y-3) = 0
+    maze(x,y-4) = 1
+
 
 end sub
 
@@ -115,6 +120,9 @@ end sub
 sub draw_wall(depth as int)
 
     x=0:y=0
+    for x as int = (depth*2) to 21-(depth*2)
+        CHARAT x, (depth*2)-1, 100
+    next x
     for y as int = 0+(depth*2) to 19-(depth*2)
     for x as int = 0+(depth*2) to 21-(depth*2)
     CHARAT x, y, 160
@@ -149,6 +157,7 @@ sub render_maze()
     if maze(player_x,player_y-4) = 1 then depth=4 
     if maze(player_x,player_y-3) = 1 then depth=3  
     if maze(player_x,player_y-2) = 1 then depth=2
+    if maze(player_x,player_y-1) = 1 then depth=1
     if depth > 0 then call draw_wall(depth)
 
 
