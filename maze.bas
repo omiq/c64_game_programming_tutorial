@@ -240,10 +240,12 @@ END SUB
 
 
 REM ==========================================
-REM MAZE CARVING — CORRECTED VERSION
+REM MAZE CARVING 
 REM ==========================================
 
 SUB carve_maze()
+
+  print chr$(147);"generating maze..."
 
   carve_dx(0)=0 : carve_dy(0)=-1
   carve_dx(1)=1 : carve_dy(1)=0
