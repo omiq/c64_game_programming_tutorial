@@ -215,8 +215,8 @@ SUB show_map()
   PRINT CHR$(147)
   PRINT " overhead map view"
 
-  FOR map_cy = 0 TO 19
-    FOR map_cx = 0 TO 19
+  FOR map_cy = 0 TO 18
+    FOR map_cx = 0 TO 18
 
       IF map_cx=player_x AND map_cy=player_y THEN
         PRINT CHR$(146);"@";
@@ -312,7 +312,7 @@ carve_loop:
     END IF
 
     REM --- chance to add a side opening ---
-    IF RND() < 0.20 THEN
+    IF RND() < 0.25 THEN
         DIM side AS BYTE
         side = (dir + 1 + CINT(RND()*1)*2) AND 3
         DIM sx AS BYTE
