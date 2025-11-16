@@ -134,21 +134,26 @@ END SUB
 
 SUB draw_left_gap(d AS BYTE)
   DIM x AS BYTE : x=d*2
-  CHARAT x,d*2+1,100
-  wall_height = 19-(d*2)-2
+    CHARAT x,d*2+1,100
+    wall_height = 19-(d*2)-2
 
-  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,121
+  if wall_height > 9 then 
+    
+      FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+      CHARAT x,y,104
 
-  x=x+1
-  CHARAT x,d*2+1,100
-  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,121
+      x=x+1
+      CHARAT x,d*2+1,100
+      FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+      CHARAT x,y,104
 
-  if y = 10 then 
-    CHARAT x,wall_height,80
-    CHARAT x-1,wall_height,119
+  else
+      CHARAT x,wall_height,70
+      CHARAT x+1,wall_height,123
+      CHARAT x,wall_height+1,100
+      CHARAT x+1,wall_height+1,97
   end if
+
 END SUB
 
 
@@ -156,20 +161,26 @@ SUB draw_right_gap(d AS BYTE)
   DIM x AS BYTE : x=21-(d*2)
   CHARAT x,d*2+1,100
   wall_height = 19-(d*2)-2
- 
 
-  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,121
+  if wall_height > 9 then 
 
-  x=x-1
-  CHARAT x,d*2+1,100
-  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,121
+    FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+    CHARAT x,y,104
 
-  if y = 10 then 
-    CHARAT x+1,wall_height,119
-    CHARAT x,wall_height,79
+    x=x-1
+    CHARAT x,d*2+1,100
+    FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+    CHARAT x,y,104
+
+  else
+      
+      CHARAT x-1,wall_height,108
+      CHARAT x,wall_height,70
+      CHARAT x-1,wall_height+1,225
+      CHARAT x,wall_height+1,100
+      
   end if
+
 END SUB
 
 
@@ -192,7 +203,8 @@ SUB render_view()
   MEMSET 1704, 22, 230
   MEMSET 1744, 22, 230
   MEMSET 1784, 22, 230
-
+  MEMSET 1824, 22, 32
+  MEMSET 1864, 26, 32
   ' render view by depth
   FOR d AS BYTE = 0 TO 4
 
