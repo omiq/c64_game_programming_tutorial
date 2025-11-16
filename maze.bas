@@ -82,23 +82,36 @@ END SUB
 
 SUB draw_full_wall(d AS BYTE)
 
-  wall_height = (d*2)
+  if d < 5 then
+    wall_height = (d*2)
 
-
-
-  FOR x AS BYTE = d*2 TO 21-wall_height
-    CHARAT x, wall_height-1, 100
-  NEXT x
-
-  FOR y AS BYTE = d*2 TO 19-wall_height
     FOR x AS BYTE = d*2 TO 21-wall_height
-      CHARAT x, y, 160
+      CHARAT x, wall_height-1, 100
     NEXT x
-  NEXT y
 
-  FOR x AS BYTE = d*2 TO 21-wall_height
-    CHARAT x, y, 232
-  NEXT x
+    FOR y AS BYTE = d*2 TO 19-wall_height
+      FOR x AS BYTE = d*2 TO 21-wall_height
+        CHARAT x, y, 160
+      NEXT x
+    NEXT y
+
+    FOR x AS BYTE = d*2 TO 21-wall_height
+      CHARAT x, y, 232
+    NEXT x
+  else
+
+    charat 9,9,98
+    charat 10,9,98
+    charat 11,9,98
+    charat 12,9,98
+
+    charat 9,10,160
+    charat 10,10,160
+    charat 11,10,160
+    charat 12,10,160
+
+  end if
+
 END SUB
 
 
