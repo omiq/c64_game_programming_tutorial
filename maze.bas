@@ -1,13 +1,23 @@
-REM ==========================================
-REM CONFIG
-REM ==========================================
+'  ==========================================
+'   3D MAZE FOR XC-BASIC (C64) 
+'   BY CHRIS GARRETT
+'   RETROGAMECODERS 2025
+'  ==========================================
+
+BACKGROUND 0
+BORDER 0
+PRINT CHR$(155)
+
+'  ==========================================
+'  CONFIG
+'  ==========================================
 
 CONST DIR_NORTH = 0
 CONST DIR_EAST  = 1
 CONST DIR_SOUTH = 2
 CONST DIR_WEST  = 3
 
-REM ===== Global Arrays =====
+'  ===== Global Arrays =====
 
 DIM carve_dx(4) AS BYTE
 DIM carve_dy(4) AS BYTE
@@ -37,12 +47,12 @@ DIM right_y(4)   AS BYTE
 DIM depth AS BYTE
 DIM key$ AS STRING * 1
 
-DIM sp AS INT     :REM GLOBAL STACK POINTER (CRITICAL FIX)
+DIM sp AS INT     '  GLOBAL STACK POINTER (CRITICAL FIX)
 
 
-REM ==========================================
-REM SETUP DIRECTION LOOKUP TABLES
-REM ==========================================
+'  ==========================================
+'  SETUP DIRECTION LOOKUP TABLES
+'  ==========================================
 
 SUB init_direction_tables()
 
@@ -66,9 +76,9 @@ END SUB
 
 
 
-REM ==========================================
-REM DRAW WALL SEGMENTS (3D VIEW)
-REM ==========================================
+'  ==========================================
+'  DRAW WALL SEGMENTS (3D VIEW)
+'  ==========================================
 
 SUB draw_full_wall(d AS BYTE)
   FOR x AS BYTE = d*2 TO 21-(d*2)
@@ -140,9 +150,9 @@ END SUB
 
 
 
-REM ==========================================
-REM RENDER 3D
-REM ==========================================
+'  ==========================================
+'  RENDER 3D
+'  ==========================================
 
 SUB render_view()
 
@@ -181,9 +191,9 @@ END SUB
 
 
 
-REM ==========================================
-REM MOVEMENT
-REM ==========================================
+'  ==========================================
+'  MOVEMENT
+'  ==========================================
 
 SUB move_forward()
   DIM nx AS BYTE : nx = player_x + forward_x(player_dir)
@@ -206,9 +216,9 @@ END SUB
 
 
 
-REM ==========================================
-REM SHOW MAP
-REM ==========================================
+'  ==========================================
+'  SHOW MAP
+'  ==========================================
 
 SUB show_map()
 
@@ -239,21 +249,21 @@ END SUB
 
 
 
-REM ==========================================
-REM MAZE CARVING 
-REM ==========================================
+'  ==========================================
+'  MAZE CARVING 
+'  ==========================================
 
 SUB carve_maze()
 
   PRINT CHR$(147);"generating maze..."
 
-  REM directional vectors
-  carve_dx(0)=0  : carve_dy(0)=-1   :REM north
-  carve_dx(1)=1  : carve_dy(1)=0    :REM east
-  carve_dx(2)=0  : carve_dy(2)=1    :REM south
-  carve_dx(3)=-1 : carve_dy(3)=0    :REM west
+  '  directional vectors
+  carve_dx(0)=0  : carve_dy(0)=-1   ' north
+  carve_dx(1)=1  : carve_dy(1)=0    ' east
+  carve_dx(2)=0  : carve_dy(2)=1    ' south
+  carve_dx(3)=-1 : carve_dy(3)=0    ' west
 
-  REM working variables
+  '  working variables
   DIM cell_x AS BYTE
   DIM cell_y AS BYTE
   DIM next_cell_x AS BYTE
@@ -263,18 +273,18 @@ SUB carve_maze()
   DIM direction_index AS BYTE
   DIM temp AS BYTE
 
-  REM ------------------------------------
-  REM 1. fill maze with walls (1)
-  REM ------------------------------------
+  '  ------------------------------------
+  '  1. fill maze with walls (1)
+  '  ------------------------------------
   FOR map_cy = 0 TO 19
     FOR map_cx = 0 TO 19
       maze(map_cx,map_cy) = 1
     NEXT map_cx
   NEXT map_cy
 
-  REM ------------------------------------
-  REM 2. choose odd starting cell
-  REM ------------------------------------
+  '  ------------------------------------
+  '  2. choose odd starting cell
+  '  ------------------------------------
   cell_x = ((CINT(RND()*8))*2)+1
   cell_y = ((CINT(RND()*8))*2)+1
 
@@ -288,13 +298,13 @@ SUB carve_maze()
 
 carve_loop:
 
-  REM load current cell from stack
+  '  load current cell from stack
   cell_x = stack_x(sp)
   cell_y = stack_y(sp)
 
-  REM ------------------------------------
-  REM build shuffled direction list
-  REM ------------------------------------
+  '  ------------------------------------
+  '  build shuffled direction list
+  '  ------------------------------------
   dirs(0)=0 : dirs(1)=1 : dirs(2)=2 : dirs(3)=3
 
   FOR shuffle_i AS BYTE = 0 TO 3
@@ -305,9 +315,9 @@ carve_loop:
     dirs(shuffle_j)=temp
   NEXT shuffle_i
 
-  REM ------------------------------------
-  REM attempt each direction
-  REM ------------------------------------
+  '  ------------------------------------
+  '  attempt each direction
+  '  ------------------------------------
   FOR try_direction AS BYTE = 0 TO 3
 
     direction_index = dirs(try_direction)
@@ -315,21 +325,21 @@ carve_loop:
     next_cell_x = cell_x + carve_dx(direction_index)*2
     next_cell_y = cell_y + carve_dy(direction_index)*2
 
-    REM boundary protection (keep 1-cell border)
+    '  boundary protection (keep 1-cell border)
     IF next_cell_x<1 OR next_cell_y<1 OR next_cell_x>18 OR next_cell_y>18 THEN GOTO no_go
 
-    REM can we carve?
+    '  can we carve?
     IF maze(next_cell_x,next_cell_y)=1 THEN
 
-      REM carve the wall between the cells
+      '  carve the wall between the cells
       wall_x = cell_x + carve_dx(direction_index)
       wall_y = cell_y + carve_dy(direction_index)
       maze(wall_x,wall_y)=0
 
-      REM carve the destination cell
+      '  carve the destination cell
       maze(next_cell_x,next_cell_y)=0
 
-      REM push next cell onto stack
+      '  push next cell onto stack
       sp = sp + 1
       stack_x(sp)=next_cell_x
       stack_y(sp)=next_cell_y
@@ -337,7 +347,7 @@ carve_loop:
       GOTO carve_loop
     END IF
 
-    REM --- optional side opening ---
+    '  --- optional side opening ---
     IF RND() < 0.25 THEN
       DIM side_dir AS BYTE
       DIM side_x AS BYTE
@@ -353,7 +363,7 @@ carve_loop:
 no_go:
   NEXT try_direction
 
-  REM backtrack
+  '  backtrack
   sp = sp - 1
   IF sp<0 THEN RETURN
   GOTO carve_loop
@@ -363,18 +373,18 @@ END SUB
 
 
 
-REM ==========================================
-REM INITIALISE MAZE
-REM ==========================================
+'  ==========================================
+'  INITIALISE MAZE
+'  ==========================================
 SUB init_maze()
   CALL carve_maze()
 END SUB
 
 
 
-REM ==========================================
-REM MAIN LOOP
-REM ==========================================
+'  ==========================================
+'  MAIN LOOP
+'  ==========================================
 
 SUB main()
 
