@@ -18,7 +18,7 @@ CONST DIR_SOUTH = 2
 CONST DIR_WEST  = 3
 
 '  ===== Global Arrays =====
-
+DIM wall_height AS BYTE
 DIM carve_dx(4) AS BYTE
 DIM carve_dy(4) AS BYTE
 DIM stack_x(400) AS BYTE
@@ -99,53 +99,72 @@ END SUB
 
 SUB draw_left_wall(d AS BYTE)
   DIM x AS BYTE : x=d*2
+  wall_height = 19-(d*2)-1
   CHARAT x,d*2,223
-  FOR y AS BYTE=d*2+1 TO 19-(d*2)-1: CHARAT x,y,160: NEXT y
-  CHARAT x,19-(d*2),105
+  FOR y AS BYTE=d*2+1 TO wall_height: CHARAT x,y,160: NEXT y
+  CHARAT x,y,105
 
   x=x+1
+  wall_height = wall_height-1
   CHARAT x,d*2+1,223
-  FOR y AS BYTE=d*2+2 TO 19-(d*2)-2: CHARAT x,y,160: NEXT y
-  CHARAT x,19-(d*2)-1,105
+  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,160: NEXT y
+  CHARAT x,y,105
 END SUB
 
 
 SUB draw_right_wall(d AS BYTE)
   DIM x AS BYTE : x=21-(d*2)
+  wall_height = 19-(d*2)-1
   CHARAT x,d*2,233
-  FOR y AS BYTE=d*2+1 TO 19-(d*2): CHARAT x,y,160: NEXT y
-  CHARAT x,19-(d*2),95
+  FOR y AS BYTE=d*2+1 TO wall_height: CHARAT x,y,160: NEXT y
+  CHARAT x,y,95
 
   x=x-1
   CHARAT x,d*2+1,233
-  FOR y AS BYTE=d*2+2 TO 19-(d*2)-1: CHARAT x,y,160: NEXT y
-  CHARAT x,19-(d*2)-1,95
+  wall_height = wall_height-1
+  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,160: NEXT y
+  CHARAT x,y,95
 END SUB
 
 
 SUB draw_left_gap(d AS BYTE)
   DIM x AS BYTE : x=d*2
   CHARAT x,d*2+1,100
-  FOR y AS BYTE=d*2+2 TO 19-(d*2)-2: CHARAT x,y,32: NEXT y
-  CHARAT x,19-(d*2)-1,232
+  wall_height = 19-(d*2)-2
+
+  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+  CHARAT x,y,232
 
   x=x+1
   CHARAT x,d*2+1,100
-  FOR y AS BYTE=d*2+2 TO 19-(d*2)-2: CHARAT x,y,32: NEXT y
-  CHARAT x,19-(d*2)-1,232
+  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+  CHARAT x,y,232
+
+  if y = 10 then 
+    CHARAT x,wall_height,80
+    CHARAT x-1,wall_height,119
+  end if
 END SUB
 
 
 SUB draw_right_gap(d AS BYTE)
   DIM x AS BYTE : x=21-(d*2)
   CHARAT x,d*2+1,100
-  FOR y AS BYTE=d*2+2 TO 19-(d*2)-2: CHARAT x,y,32: NEXT y
-  CHARAT x,19-(d*2)-1,232
+  wall_height = 19-(d*2)-2
+ 
+
+  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+  CHARAT x,y,232
 
   x=x-1
   CHARAT x,d*2+1,100
-  FOR y AS BYTE=d*2+2 TO 19-(d*2)-2: CHARAT x,y,32: NEXT y
-  CHARAT x,19-(d*2)-1,232
+  FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
+  CHARAT x,y,232
+
+  if y = 10 then 
+    CHARAT x+1,wall_height,119
+    CHARAT x,wall_height,79
+  end if
 END SUB
 
 
@@ -156,7 +175,7 @@ END SUB
 
 SUB render_view()
 
-  ' clear screen
+  ' clear screen unrolled
   MEMSET 1024, 400, 32
   MEMSET 1424, 22, 230
   MEMSET 1464, 22, 230
@@ -169,7 +188,7 @@ SUB render_view()
   MEMSET 1744, 22, 230
   MEMSET 1784, 22, 230
 
-
+  ' render view by depth
   FOR d AS BYTE = 0 TO 4
 
     DIM ax AS BYTE
