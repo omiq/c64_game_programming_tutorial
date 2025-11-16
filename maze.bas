@@ -118,9 +118,6 @@ SUB draw_full_wall(d AS BYTE)
       charat 10,10,232
       charat 11,10,232
       charat 12,10,232
-    
-      ' charat 10,10,160
-      ' charat 11,10,160
 
 
     end if
