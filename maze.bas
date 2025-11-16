@@ -213,7 +213,7 @@ REM ==========================================
 SUB show_map()
 
   PRINT CHR$(147)
-  PRINT " OVERHEAD MAP VIEW"
+  PRINT " overhead map view"
 
   FOR map_cy = 0 TO 19
     FOR map_cx = 0 TO 19
@@ -228,7 +228,7 @@ SUB show_map()
     PRINT ""
   NEXT map_cy
 
-  PRINT "PRESS A KEY TO CONTINUE..."
+  PRINT "press a key to continue..."
 
   key$=""
   DO WHILE key$=""
@@ -310,6 +310,20 @@ carve_loop:
       stack_y(sp)=ny
       GOTO carve_loop
     END IF
+
+    REM --- chance to add a side opening ---
+    IF RND() < 0.20 THEN
+        DIM side AS BYTE
+        side = (dir + 1 + CINT(RND()*1)*2) AND 3
+        DIM sx AS BYTE
+        DIM sy AS BYTE
+        sx = cx + carve_dx(side)
+        sy = cy + carve_dy(side)
+        IF sx>1 AND sx<18 AND sy>1 AND sy<18 THEN
+            maze(sx,sy) = 0
+        END IF
+    END IF
+
 
 cant:
   NEXT try_i
