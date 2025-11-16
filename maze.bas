@@ -81,18 +81,23 @@ END SUB
 '  ==========================================
 
 SUB draw_full_wall(d AS BYTE)
-  FOR x AS BYTE = d*2 TO 21-(d*2)
-    CHARAT x, d*2, 100
+
+  wall_height = (d*2)
+
+
+
+  FOR x AS BYTE = d*2 TO 21-wall_height
+    CHARAT x, wall_height-1, 100
   NEXT x
 
-  FOR y AS BYTE = d*2 TO 19-(d*2)
-    FOR x AS BYTE = d*2 TO 21-(d*2)
+  FOR y AS BYTE = d*2 TO 19-wall_height
+    FOR x AS BYTE = d*2 TO 21-wall_height
       CHARAT x, y, 160
     NEXT x
   NEXT y
 
-  FOR x AS BYTE = d*2 TO 21-(d*2)
-    CHARAT x, 19-(d*2), 232
+  FOR x AS BYTE = d*2 TO 21-wall_height
+    CHARAT x, y, 232
   NEXT x
 END SUB
 
@@ -133,12 +138,12 @@ SUB draw_left_gap(d AS BYTE)
   wall_height = 19-(d*2)-2
 
   FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,232
+  CHARAT x,y,121
 
   x=x+1
   CHARAT x,d*2+1,100
   FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,232
+  CHARAT x,y,121
 
   if y = 10 then 
     CHARAT x,wall_height,80
@@ -154,12 +159,12 @@ SUB draw_right_gap(d AS BYTE)
  
 
   FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,232
+  CHARAT x,y,121
 
   x=x-1
   CHARAT x,d*2+1,100
   FOR y AS BYTE=d*2+2 TO wall_height: CHARAT x,y,32: NEXT y
-  CHARAT x,y,232
+  CHARAT x,y,121
 
   if y = 10 then 
     CHARAT x+1,wall_height,119
