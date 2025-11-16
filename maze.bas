@@ -206,7 +206,7 @@ SUB render_view()
   MEMSET 1824, 22, 32
   MEMSET 1864, 26, 32
   ' render view by depth
-  FOR d AS BYTE = 0 TO 4
+  FOR d AS BYTE = 0 TO 5
 
     DIM ax AS BYTE
     DIM ay AS BYTE
@@ -219,14 +219,15 @@ SUB render_view()
       RETURN
     END IF
 
-    DIM lx AS BYTE : lx = ax + left_x(player_dir)
-    DIM ly AS BYTE : ly = ay + left_y(player_dir)
-    DIM rx AS BYTE : rx = ax + right_x(player_dir)
-    DIM ry AS BYTE : ry = ay + right_y(player_dir)
+  if d < 5 then
+      DIM lx AS BYTE : lx = ax + left_x(player_dir)
+      DIM ly AS BYTE : ly = ay + left_y(player_dir)
+      DIM rx AS BYTE : rx = ax + right_x(player_dir)
+      DIM ry AS BYTE : ry = ay + right_y(player_dir)
 
-    IF maze(lx,ly)=1 THEN CALL draw_left_wall(d) ELSE CALL draw_left_gap(d)
-    IF maze(rx,ry)=1 THEN CALL draw_right_wall(d) ELSE CALL draw_right_gap(d)
-
+      IF maze(lx,ly)=1 THEN CALL draw_left_wall(d) ELSE CALL draw_left_gap(d)
+      IF maze(rx,ry)=1 THEN CALL draw_right_wall(d) ELSE CALL draw_right_gap(d)
+  end if
   NEXT d
 
 END SUB
