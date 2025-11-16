@@ -100,15 +100,30 @@ SUB draw_full_wall(d AS BYTE)
     NEXT x
   else
 
-    charat 9,9,98
-    charat 10,9,98
-    charat 11,9,98
-    charat 12,9,98
+    if d = 5 then
 
-    charat 9,10,160
-    charat 10,10,160
-    charat 11,10,160
-    charat 12,10,160
+      charat 9,9,98
+      charat 10,9,98
+      charat 11,9,98
+      charat 12,9,98
+
+      charat 9,10,160
+      charat 10,10,160
+      charat 11,10,160
+      charat 12,10,160
+
+    else
+
+      charat 9,10,232
+      charat 10,10,232
+      charat 11,10,232
+      charat 12,10,232
+    
+      ' charat 10,10,160
+      ' charat 11,10,160
+
+
+    end if
 
   end if
 
@@ -219,7 +234,7 @@ SUB render_view()
   MEMSET 1824, 22, 32
   MEMSET 1864, 26, 32
   ' render view by depth
-  FOR d AS BYTE = 0 TO 5
+  FOR d AS BYTE = 0 TO 6
 
     DIM ax AS BYTE
     DIM ay AS BYTE
