@@ -245,96 +245,121 @@ REM ==========================================
 
 SUB carve_maze()
 
-  print chr$(147);"generating maze..."
+  PRINT CHR$(147);"generating maze..."
 
-  carve_dx(0)=0 : carve_dy(0)=-1
-  carve_dx(1)=1 : carve_dy(1)=0
-  carve_dx(2)=0 : carve_dy(2)=1
-  carve_dx(3)=-1: carve_dy(3)=0
+  REM directional vectors
+  carve_dx(0)=0  : carve_dy(0)=-1   :REM north
+  carve_dx(1)=1  : carve_dy(1)=0    :REM east
+  carve_dx(2)=0  : carve_dy(2)=1    :REM south
+  carve_dx(3)=-1 : carve_dy(3)=0    :REM west
 
-  DIM cx AS BYTE
-  DIM cy AS BYTE
-  DIM nx AS BYTE
-  DIM ny AS BYTE
-  DIM wx AS BYTE
-  DIM wy AS BYTE
-  DIM dir AS BYTE
-  DIM tmp AS BYTE
+  REM working variables
+  DIM cell_x AS BYTE
+  DIM cell_y AS BYTE
+  DIM next_cell_x AS BYTE
+  DIM next_cell_y AS BYTE
+  DIM wall_x AS BYTE
+  DIM wall_y AS BYTE
+  DIM direction_index AS BYTE
+  DIM temp AS BYTE
 
+  REM ------------------------------------
+  REM 1. fill maze with walls (1)
+  REM ------------------------------------
   FOR map_cy = 0 TO 19
     FOR map_cx = 0 TO 19
-      maze(map_cx,map_cy)=1
+      maze(map_cx,map_cy) = 1
     NEXT map_cx
   NEXT map_cy
 
-  cx = ((CINT(RND()*8))*2)+1
-  cy = ((CINT(RND()*8))*2)+1
+  REM ------------------------------------
+  REM 2. choose odd starting cell
+  REM ------------------------------------
+  cell_x = ((CINT(RND()*8))*2)+1
+  cell_y = ((CINT(RND()*8))*2)+1
 
-  maze(cx,cy)=0
-  start_x=cx : start_y=cy
+  maze(cell_x,cell_y)=0
+  start_x = cell_x
+  start_y = cell_y
 
-  sp=0
-  stack_x(0)=cx
-  stack_y(0)=cy
+  sp = 0
+  stack_x(0) = cell_x
+  stack_y(0) = cell_y
 
 carve_loop:
 
-  cx = stack_x(sp)
-  cy = stack_y(sp)
+  REM load current cell from stack
+  cell_x = stack_x(sp)
+  cell_y = stack_y(sp)
 
+  REM ------------------------------------
+  REM build shuffled direction list
+  REM ------------------------------------
   dirs(0)=0 : dirs(1)=1 : dirs(2)=2 : dirs(3)=3
 
-  FOR loop_i AS BYTE = 0 TO 3
-    DIM loop_j AS BYTE
-    loop_j = loop_i + CINT(RND()*(3-loop_i))
-    tmp = dirs(loop_i)
-    dirs(loop_i)=dirs(loop_j)
-    dirs(loop_j)=tmp
-  NEXT loop_i
+  FOR shuffle_i AS BYTE = 0 TO 3
+    DIM shuffle_j AS BYTE
+    shuffle_j = shuffle_i + CINT(RND()*(3-shuffle_i))
+    temp = dirs(shuffle_i)
+    dirs(shuffle_i)=dirs(shuffle_j)
+    dirs(shuffle_j)=temp
+  NEXT shuffle_i
 
-  FOR try_i AS BYTE = 0 TO 3
+  REM ------------------------------------
+  REM attempt each direction
+  REM ------------------------------------
+  FOR try_direction AS BYTE = 0 TO 3
 
-    dir = dirs(try_i)
+    direction_index = dirs(try_direction)
 
-    nx = cx + carve_dx(dir)*2
-    ny = cy + carve_dy(dir)*2
+    next_cell_x = cell_x + carve_dx(direction_index)*2
+    next_cell_y = cell_y + carve_dy(direction_index)*2
 
-    IF nx<1 OR ny<1 OR nx>18 OR ny>18 THEN GOTO cant
+    REM boundary protection (keep 1-cell border)
+    IF next_cell_x<1 OR next_cell_y<1 OR next_cell_x>18 OR next_cell_y>18 THEN GOTO no_go
 
-    IF maze(nx,ny)=1 THEN
-      wx=cx+carve_dx(dir)
-      wy=cy+carve_dy(dir)
-      maze(wx,wy)=0
-      maze(nx,ny)=0
+    REM can we carve?
+    IF maze(next_cell_x,next_cell_y)=1 THEN
 
-      sp=sp+1
-      stack_x(sp)=nx
-      stack_y(sp)=ny
+      REM carve the wall between the cells
+      wall_x = cell_x + carve_dx(direction_index)
+      wall_y = cell_y + carve_dy(direction_index)
+      maze(wall_x,wall_y)=0
+
+      REM carve the destination cell
+      maze(next_cell_x,next_cell_y)=0
+
+      REM push next cell onto stack
+      sp = sp + 1
+      stack_x(sp)=next_cell_x
+      stack_y(sp)=next_cell_y
+
       GOTO carve_loop
     END IF
 
-    REM --- chance to add a side opening ---
+    REM --- optional side opening ---
     IF RND() < 0.25 THEN
-        DIM side AS BYTE
-        side = (dir + 1 + CINT(RND()*1)*2) AND 3
-        DIM sx AS BYTE
-        DIM sy AS BYTE
-        sx = cx + carve_dx(side)
-        sy = cy + carve_dy(side)
-        IF sx>1 AND sx<18 AND sy>1 AND sy<18 THEN
-            maze(sx,sy) = 0
-        END IF
+      DIM side_dir AS BYTE
+      DIM side_x AS BYTE
+      DIM side_y AS BYTE
+      side_dir = (direction_index + 1 + CINT(RND()*1)*2) AND 3
+      side_x = cell_x + carve_dx(side_dir)
+      side_y = cell_y + carve_dy(side_dir)
+      IF side_x>1 AND side_x<18 AND side_y>1 AND side_y<18 THEN
+        maze(side_x,side_y)=0
+      END IF
     END IF
 
+no_go:
+  NEXT try_direction
 
-cant:
-  NEXT try_i
-
+  REM backtrack
   sp = sp - 1
   IF sp<0 THEN RETURN
   GOTO carve_loop
 
 END SUB
+
 
 
 
