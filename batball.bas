@@ -1,32 +1,33 @@
-; Sprite routines
-include "xcb-ext-sprite.bas"
-CONST \RASTER_LINE  = $d012
+' CONVERTED TO XCBASIC3
+'
+CONST RASTER_LINE  = $d012
 CONST SHAPES_START = $2000
 
-dim \_count_bounce fast
-dim \_ball_x! fast
-dim \_ball_y! fast
-dim \_ball_xdir fast
-dim \_ball_ydir fast
-dim \x! fast
-dim \y! fast
-dim \speed fast
+dim count_bounce fast
+dim ball_x fast
+dim ball_y fast
+dim ball_xdir fast
+dim ball_ydir fast
+dim x fast
+dim y fast
+dim speed fast
 
-; add sprite data to sprite memory
-data _ball_sprite![]= incbin "ball.bin"
-data _bat_sprite![]= incbin "bat.bin"
-memcpy  @_ball_sprite!,SHAPES_START,64
-memcpy  @_bat_sprite!,SHAPES_START+64,64
-
-; set up the sprite
+' add sprite data to sprite memory
+GOTO start
+ORIGIN $2000
+incbin "ball.bin"
+incbin "bat.bin"
+ORIGIN $4000
+start:
+' set up the sprite
 call spr_setshape(0, SHAPES_START/64)
 call spr_setshape(1, (SHAPES_START+64)/64)
 call spr_setcolor(0, $01)
 call spr_setcolor(1, $01)
 call spr_setmulti(0)
 call spr_setmulti(1)
-spr_multicolor1! = $0c
-spr_multicolor2! = $0f
+spr_multicolor1 = $0c
+spr_multicolor2 = $0f
 call spr_overbg(0)
 call spr_overbg(1)
 
@@ -37,10 +38,10 @@ call spr_enable(1)
 rem -- Set background color
 poke $d021, 0
 
-; set border
-poke $D020,14  ;border
+' set border
+poke $D020,14  'border
 
-; Keyboard auto-repeat
+' Keyboard auto-repeat
 poke 650,128
 
 proc _title
@@ -52,7 +53,7 @@ proc _title
   print "{GRAY}{REV_ON}press space to start{REV_OFF}"
   curpos 10,14
   print "{BLUE}keys: i, j, k & l"
-  while inkey!()=0
+  while inkey()=0
     rem
   endwhile
 
@@ -61,37 +62,37 @@ endproc
 proc _init
 
 
-  let \_count_bounce = 0
+  let count_bounce = 0
 
-  let \_ball_x! = 50
-  let \_ball_y! = 50
-  let \_ball_xdir = 1
-  let \_ball_ydir = 1
+  let ball_x = 50
+  let ball_y = 50
+  let ball_xdir = 1
+  let ball_ydir = 1
 
-  let \x! = 150
-  let \y! = 200
+  let x = 150
+  let y = 200
 
-  ; SPEED
-  let \speed = 1
+  ' SPEED
+  let speed = 1
 
-  ; LIVES
+  ' LIVES
   let \lives = 3
 
 
-  ; fast way to fill the color memory with color
+  ' fast way to fill the color memory with color
   memset 55296, 1000, 11
 
-  ; fast way to fill the screen memory with space
+  ' fast way to fill the screen memory with space
   memset 1024, 1000, 32
 
-  ; right-border line
+  ' right-border line
   for r = 0 to 24
     let _m = 24+ 1024 + (r*40)
     poke _m,66
     memset 55296+((r*40)+24),8,$0E
   next r
 
-  ; Score table
+  ' Score table
   textat 26,2,"lives:    "
   textat 26,4,"score:    "
 
@@ -114,15 +115,15 @@ proc _sfx_bounce
   next _b
   poke 54276,16
   
-  inc \_count_bounce
-  if \_count_bounce < 10 then \speed = 1
-  if \_count_bounce >= 10 then \speed = 2
-  if \_count_bounce >= 20 then \speed = 4
-  if \_count_bounce >= 30 then \speed = 6
-  if \_count_bounce >= 40 then \speed = 8
-  if \_count_bounce >= 50 then \speed = 10
-  if \_count_bounce >= 60 then \speed = 12
-  if \_count_bounce >= 70 then \speed = 14
+  inc count_bounce
+  if count_bounce < 10 then speed = 1
+  if count_bounce >= 10 then speed = 2
+  if count_bounce >= 20 then speed = 4
+  if count_bounce >= 30 then speed = 6
+  if count_bounce >= 40 then speed = 8
+  if count_bounce >= 50 then speed = 10
+  if count_bounce >= 60 then speed = 12
+  if count_bounce >= 70 then speed = 14
 
   
 endproc
@@ -149,69 +150,69 @@ proc _sfx_oops
 endproc
 
 
-; Waits for keypress
+' Waits for keypress
 proc bounce_loop
 
-  let key! = 0
+  let key = 0
   
-  ; Waits for escape key or no lives
-  while key! <> 3 and \lives > 0 
+  ' Waits for escape key or no lives
+  while key <> 3 and \lives > 0 
   
-     ; Wait virtical blank
-    watch \RASTER_LINE, 250
+     ' Wait virtical blank
+    watch RASTER_LINE, 250
     
     enableirq
-    let key! = inkey!()
+    let key = inkey()
     disableirq
     
-    if key! = 73 and \y! >= 42 then \y! = \y! - 8
-    if key! = 74 and \x! >= 32 then \x! = \x! - 8
-    if key! = 75 and \y! <= 220 then \y! = \y! + 8
-    if key! = 76 and \x! <= 182 then \x! = \x! + 8
+    if key = 73 and y >= 42 then y = y - 8
+    if key = 74 and x >= 32 then x = x - 8
+    if key = 75 and y <= 220 then y = y + 8
+    if key = 76 and x <= 182 then x = x + 8
     
-    ; At left or right border?
-    if \_ball_x! = 200 then 
+    ' At left or right border?
+    if ball_x = 200 then 
       call _sfx_bounce
-      let \_ball_xdir = -1 * \speed
+      let ball_xdir = -1 * speed
     endif
     
-    if \_ball_x! = 20 then 
+    if ball_x = 20 then 
       call _sfx_bounce
-      let \_ball_xdir = \speed 
+      let ball_xdir = speed 
     endif
     
-    ; At bottom or top?
-    if \_ball_y! = 240 then 
-      let \_ball_ydir = -1 * \speed
+    ' At bottom or top?
+    if ball_y = 240 then 
+      let ball_ydir = -1 * speed
       call _sfx_oops
       dec \lives
     endif
     
-    if \_ball_y! = 44 then 
+    if ball_y = 44 then 
       call _sfx_bounce
-      let \_ball_ydir = \speed
+      let ball_ydir = speed
     endif
     
-    ; Move sprite horizontal
-    let \_ball_x! = \_ball_x! + \_ball_xdir
+    ' Move sprite horizontal
+    let ball_x = ball_x + ball_xdir
     
-    ; Move sprite vertical
-    let \_ball_y! = \_ball_y! + \_ball_ydir  
+    ' Move sprite vertical
+    let ball_y = ball_y + ball_ydir  
 
    
-    ; Set sprite locations
-    call spr_setpos(0, \_ball_x!, \_ball_y!)
-    call spr_setpos(1, \x!, \y!)
+    ' Set sprite locations
+    call spr_setpos(0, ball_x, ball_y)
+    call spr_setpos(1, x, y)
     
       
-    ; COLLISIONS??
-    if spr_spr_collision!(0) = 1 and \_ball_ydir = (1 * \speed) then 
-      let \_ball_ydir = -1 * \speed
+    ' COLLISIONS??
+    if spr_spr_collision(0) = 1 and ball_ydir = (1 * speed) then 
+      let ball_ydir = -1 * speed
       call _sfx_bounce
     endif
     
     textat 33,2, \lives
-    textat 33,4, \_count_bounce
+    textat 33,4, count_bounce
 
 
   endwhile
