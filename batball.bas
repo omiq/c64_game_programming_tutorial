@@ -8,10 +8,19 @@ DIM a$ AS STRING * 1
 DIM x,y AS BYTE FAST
 DIM ballx,bally AS BYTE FAST
 DIM xdir,ydir AS INT FAST
+DIM cx,cy AS BYTE
+
+PRINT CHR$(147)
 
 SUB curpos(row AS BYTE, col AS BYTE) STATIC
   POKE 214, row: POKE 211, col: SYS 58732
 END SUB
+
+FOR cy = 0 TO 24
+  FOR cx = 30 TO 39
+    TEXTAT cx, cy, CHR$(230), 5
+  NEXT cx
+NEXT cy
 
 REM store sprite shapes in safe VIC-visible RAM
 CONST SHAPES_START = $3000        : REM 12288
@@ -19,7 +28,7 @@ CONST SHAPES_START = $3000        : REM 12288
 memcpy @ballsprite, SHAPES_START, 64
 memcpy @batsprite,  SHAPES_START+64, 64
 
-PRINT CHR$(147)
+
 
 REM compiler multicolor flags
 SPRITE MULTICOLOR 1, 1
@@ -54,7 +63,7 @@ SPRITE 1 ON AT x,y
 SPRITE 0 ON AT 120,120
 
 
-
+' Keyboard control and game loop
 DO WHILE NOT KEY(ESC)
 
   IF KEY(A) THEN x=x-1
