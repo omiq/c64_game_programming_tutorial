@@ -10,12 +10,16 @@ DIM ballx,bally AS BYTE FAST
 DIM xdir,ydir AS INT FAST
 DIM cx,cy AS BYTE
 
+BACKGROUND 0
+BORDER 0
+
 PRINT CHR$(147)
 
 SUB curpos(row AS BYTE, col AS BYTE) STATIC
   POKE 214, row: POKE 211, col: SYS 58732
 END SUB
 
+' Wall/HUD
 FOR cy = 0 TO 24
   FOR cx = 30 TO 39
     TEXTAT cx, cy, CHR$(230), 5
@@ -36,7 +40,7 @@ SPRITE MULTICOLOR 1, 1
 REM multicolor settings from your editor
 POKE $D025, 12        : REM multicolor #1
 POKE $D026, 11        : REM multicolor #2
-POKE $D021, 6         : REM background color
+'POKE $D021, 6         : REM background color
 
 SPRITE 0 COLOR 15 MULTI ON BACKGROUND
 SPRITE 1 COLOR 15 MULTI ON BACKGROUND
@@ -55,13 +59,13 @@ POKE 2041, (SHAPES_START+64)/64   : REM = 193
 
 x=100
 y=110
-ballx=120
-bally=120
+ballx=70
+bally=70
 xdir=-1
 ydir=-1
 SPRITE 1 ON AT x,y
 SPRITE 0 ON AT 120,120
-
+SPRITE CLEAR HIT
 
 ' Keyboard control and game loop
 DO WHILE NOT KEY(ESC)
@@ -75,10 +79,16 @@ DO WHILE NOT KEY(ESC)
   SPRITE 1 AT x,y
   SPRITE 0 AT ballx,bally
 
-  IF ballx=240 THEN xdir=-xdir
-  IF ballx=0 THEN xdir=-xdir
-  IF bally=240 THEN ydir=-ydir
-  IF bally=40 THEN ydir=-ydir
+  IF (bally - 10) = y AND (ballx + 10) = x THEN 
+      ydir=-ydir
+      
+  ELSE
+    IF ballx=240 THEN xdir=-xdir
+    IF ballx=0 THEN xdir=-xdir
+    IF bally=240 THEN ydir=-ydir
+    IF bally=40 THEN ydir=-ydir
+  END IF
+  
   ballx=ballx+xdir
   bally=bally+ydir
 
