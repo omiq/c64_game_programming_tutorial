@@ -70,27 +70,25 @@ SPRITE CLEAR HIT
 ' Keyboard control and game loop
 DO WHILE NOT KEY(ESC)
 
-  IF KEY(A) THEN x=x-1
-  IF KEY(D) THEN x=x+1
-  IF KEY(W) THEN y=y-1
-  IF KEY(S) THEN y=y+1
+  IF KEY(A) THEN x=x-2
+  IF KEY(D) THEN x=x+2
+  IF KEY(W) THEN y=y-2
+  IF KEY(S) THEN y=y+2
+
+
+  IF (bally+10) > y AND ballx >= x-8 AND ballx <= x+8 AND ydir>0 THEN ydir=-ydir
+  IF ballx=240 THEN xdir=-xdir
+  IF ballx=0 THEN xdir=-xdir
+  IF bally=240 THEN ydir=-ydir
+  IF bally=40 THEN ydir=-ydir
+
+  
+  ballx=ballx+xdir
+  bally=bally+ydir
 
   WAIT 53265, 128
   SPRITE 1 AT x,y
   SPRITE 0 AT ballx,bally
-
-  IF (bally - 10) = y AND (ballx + 10) = x THEN 
-      ydir=-ydir
-      
-  ELSE
-    IF ballx=240 THEN xdir=-xdir
-    IF ballx=0 THEN xdir=-xdir
-    IF bally=240 THEN ydir=-ydir
-    IF bally=40 THEN ydir=-ydir
-  END IF
-  
-  ballx=ballx+xdir
-  bally=bally+ydir
 
 LOOP
 END
