@@ -1,6 +1,11 @@
 CONST RASTER_LINE  = $d012
+CONST W = 64770 ' scan code
+CONST A = 64772 ' scan code
+CONST S = 64800 ' scan code
+CONST D = 64260 ' scan code
+CONST ESC = 32640 ' scan code
 DIM a$ AS STRING * 1
-DIM x,y AS BYTE
+DIM x,y AS BYTE FAST
 
 SUB curpos(row AS BYTE, col AS BYTE) STATIC
   POKE 214, row: POKE 211, col: SYS 58732
@@ -28,6 +33,8 @@ SPRITE 1 COLOR 15 MULTI ON BACKGROUND
 REM hardware multicolor enable (sprites 0 and 1)
 POKE $D01C, %00000011
 
+POKE 650,128
+
 call curpos(10,10)
 PRINT "bat and ball demo"
 
@@ -37,18 +44,22 @@ POKE 2041, (SHAPES_START+64)/64   : REM = 193
 
 x=100
 y=110
+SPRITE 1 ON AT x,y
+SPRITE 0 ON AT 120,120
 
 
 
-GET a$
-DO WHILE a$ <> CHR$(3)
-  GET a$
-  IF a$ = "a" THEN x=x-1
-  IF a$ = "d" THEN x=x+1
-  IF a$ = "w" THEN y=y-1
-  IF a$ = "s" THEN y=y+1
-  SPRITE 0 ON AT x,y
-  SPRITE 1 ON AT 120,120
+DO WHILE NOT KEY(ESC)
+
+  IF KEY(A) THEN x=x-1
+  IF KEY(D) THEN x=x+1
+  IF KEY(W) THEN y=y-1
+  IF KEY(S) THEN y=y+1
+
+  WAIT 53265, 128
+  SPRITE 1 AT x,y
+  SPRITE 0 AT 120,120
+
 LOOP
 END
 
