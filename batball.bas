@@ -1,5 +1,6 @@
 CONST RASTER_LINE  = $d012
 DIM a$ AS STRING * 1
+DIM x,y AS BYTE
 
 SUB curpos(row AS BYTE, col AS BYTE) STATIC
   POKE 214, row: POKE 211, col: SYS 58732
@@ -34,10 +35,21 @@ REM set sprite pointers for $3000 and $3000+64
 POKE 2040, SHAPES_START/64        : REM = 192
 POKE 2041, (SHAPES_START+64)/64   : REM = 193
 
-SPRITE 0 ON AT 100,110
-SPRITE 1 ON AT 120,120
+x=100
+y=110
+
+
 
 GET a$
+DO WHILE a$ <> CHR$(3)
+  GET a$
+  IF a$ = "a" THEN x=x-1
+  IF a$ = "d" THEN x=x+1
+  IF a$ = "w" THEN y=y-1
+  IF a$ = "s" THEN y=y+1
+  SPRITE 0 ON AT x,y
+  SPRITE 1 ON AT 120,120
+LOOP
 END
 
 

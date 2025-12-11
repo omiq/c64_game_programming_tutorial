@@ -16,8 +16,9 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": false
-            }
+                "isDefault": true
+            },
+            "problemMatcher": []
         },
         {
             "label": "XC=BASIC Debug File",
@@ -44,10 +45,7 @@
                 "${file}",
                 "${fileBasenameNoExtension}.prg"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": "$xcbasic3"
         },
         {
