@@ -1,30 +1,34 @@
-; rem the picture data
-data _pic![] = incbin "retro.koa"
-  
-; switch to bitmap mode 
+ORIGIN $2000
+incbin "retro.koa"
+ORIGIN $4800
+
+DIM k$ AS STRING * 1
+DIM _ths AS BYTE
+
+' switch to bitmap mode 
 rem -- Configure VIC to bank 0,
 rem -- bitmap address at $2000
-poke $dd00, peek!($dd00) | %00000011
-poke $d018, peek!($d018) | %00001000
+poke $dd00, peek($dd00) OR %00000011
+poke $d018, peek($d018) OR %00001000
 
-; set border to black
-poke $D020,0  ;border
+' set border to black
+poke $D020,0  'border
 
 rem -- Enable multicolor bitmap mode
-poke $d011, peek!($d011) | %00100000
-poke $d016, peek!($d016) | %00010000
+poke $d011, peek($d011) OR %00100000
+poke $d016, peek($d016) OR %00010000
 
 rem -- Set background color
-poke $d021, peek!(@_pic!+10000+2)
+poke $d021, peek($2002)
 
-;$6000 - $7F3F	Bitmap
-;$7F40 - $8327	Screen RAM
-;$8328 - $870F	Color RAM
-;$8710	Background
-memshift @_pic!+2, $6000, 10000
+'$6000 - $7F3F	Bitmap
+'$7F40 - $8327	Screen RAM
+'$8328 - $870F	Color RAM
+'$8710	Background
+memshift $2000, $6000, 10000
 
 rem -- Set background color
-poke $d021, peek!($8710)
+poke $d021, peek($8710)
 
 rem -- Copy bitmap
 memcpy $6000, $2000, 8000
@@ -35,38 +39,40 @@ memcpy $7f40, $0400, 1000
 rem -- Copy colors
 memcpy $8328, $d800, 1000
 
-; Waits for keypress
-proc wait_key
-    ;print "{REV_ON}press a key to continue{REV_OFF}"
-loop:
-  let key! = inkey!()
-  if key! = 0 then goto loop
+'
 
-endproc  
+SUB waitkey ()
+  GET k$
+  DO WHILE LEN(k$) = 0 ' 32 = space bar
+    GET k$
+    PRINT k$
+  LOOP
 
-call wait_key
+END SUB  
 
-;==========================
-; ^^^^ Bitmap vvv Text
-;==========================
+call waitkey()
+
+'==========================
+' ^^^^ Bitmap vvv Text
+'==========================
 
 
 rem -- reset the screen
 sys $FF81 : rem Initialize VIC, restore default input/output to keyboard/screen, clear screen, set PAL/NTSC switch and interrupt timer
 
-poke $0286,1    ;text
-poke $D020 ,14  ;border
-poke $D021,14 ;changes the background color.
-;sys $E544
+poke $0286,1    'text
+poke $D020 ,14  'border
+poke $D021,14 'changes the background color.
+'sys $E544
 
-curpos 0,0 
-for i! = 0 to 255
-  let _ths! = i!
-  poke 1024+i!, _ths!
-next i!
+'curpos 0,0 
+for i AS BYTE= 0 to 255
+  let _ths = i
+  poke 1024+i, _ths
+next i
 
 
-curpos 0, 12
+'curpos 0, 12
 print "this text will be upper case"
 print "{DARK_GRAY}{REVERSE ON}grey{REVERSE OFF}"
 
@@ -76,6 +82,6 @@ textat 10,16,"cool huh?"
 rem -- set colors
 memset $d800, 500, 0
 
-call wait_key
+call waitkey()
 end
 

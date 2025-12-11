@@ -1,6 +1,6 @@
 # Commdore C64 programming [tutorial](https://retrogamecoders.com) and **XC=Basic** C64 Text Adventure engine
 
-## bat and ball sprite game demo
+## bat and ball sprite game demo converted to xcbasic3
 ![batball.png](batball.png)
 
 * batball.bas basic code

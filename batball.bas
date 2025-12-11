@@ -1,230 +1,66 @@
-' CONVERTED TO XCBASIC3
-'
 CONST RASTER_LINE  = $d012
-CONST SHAPES_START = $2000
+DIM a$ AS STRING * 1
 
-dim count_bounce fast
-dim ball_x fast
-dim ball_y fast
-dim ball_xdir fast
-dim ball_ydir fast
-dim x fast
-dim y fast
-dim speed fast
+SUB curpos(row AS BYTE, col AS BYTE) STATIC
+  POKE 214, row: POKE 211, col: SYS 58732
+END SUB
 
-' add sprite data to sprite memory
-GOTO start
-ORIGIN $2000
-incbin "ball.bin"
-incbin "bat.bin"
-ORIGIN $4000
-start:
-' set up the sprite
-call spr_setshape(0, SHAPES_START/64)
-call spr_setshape(1, (SHAPES_START+64)/64)
-call spr_setcolor(0, $01)
-call spr_setcolor(1, $01)
-call spr_setmulti(0)
-call spr_setmulti(1)
-spr_multicolor1 = $0c
-spr_multicolor2 = $0f
-call spr_overbg(0)
-call spr_overbg(1)
+REM store sprite shapes in safe VIC-visible RAM
+CONST SHAPES_START = $3000        : REM 12288
 
-rem -- Show the sprite
-call spr_enable(0)
-call spr_enable(1)
+memcpy @ballsprite, SHAPES_START, 64
+memcpy @batsprite,  SHAPES_START+64, 64
 
-rem -- Set background color
-poke $d021, 0
+PRINT CHR$(147)
 
-' set border
-poke $D020,14  'border
+REM compiler multicolor flags
+SPRITE MULTICOLOR 1, 1
 
-' Keyboard auto-repeat
-poke 650,128
+REM multicolor settings from your editor
+POKE $D025, 12        : REM multicolor #1
+POKE $D026, 11        : REM multicolor #2
+POKE $D021, 6         : REM background color
 
-proc _title
-  
-  print "{CLR}"
-  curpos 10,10
-  print "{LIGHT_GRAY}bat and ball game"
-  curpos 8,12
-  print "{GRAY}{REV_ON}press space to start{REV_OFF}"
-  curpos 10,14
-  print "{BLUE}keys: i, j, k & l"
-  while inkey()=0
-    rem
-  endwhile
+SPRITE 0 COLOR 15 MULTI ON BACKGROUND
+SPRITE 1 COLOR 15 MULTI ON BACKGROUND
 
-endproc
+REM hardware multicolor enable (sprites 0 and 1)
+POKE $D01C, %00000011
 
-proc _init
+call curpos(10,10)
+PRINT "bat and ball demo"
+
+REM set sprite pointers for $3000 and $3000+64
+POKE 2040, SHAPES_START/64        : REM = 192
+POKE 2041, (SHAPES_START+64)/64   : REM = 193
+
+SPRITE 0 ON AT 100,110
+SPRITE 1 ON AT 120,120
+
+GET a$
+END
 
 
-  let count_bounce = 0
+ballsprite:
+DATA AS BYTE _
+0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,21,0, _
+0,85,64, 1,105,80, 1,169,80, 5,169,84, _
+5,165,244, 5,85,244, 5,87,244, 1,87,208, _
+1,223,80, 0,125,64, 0,21,0, _
+0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0
 
-  let ball_x = 50
-  let ball_y = 50
-  let ball_xdir = 1
-  let ball_ydir = 1
-
-  let x = 150
-  let y = 200
-
-  ' SPEED
-  let speed = 1
-
-  ' LIVES
-  let \lives = 3
-
-
-  ' fast way to fill the color memory with color
-  memset 55296, 1000, 11
-
-  ' fast way to fill the screen memory with space
-  memset 1024, 1000, 32
-
-  ' right-border line
-  for r = 0 to 24
-    let _m = 24+ 1024 + (r*40)
-    poke _m,66
-    memset 55296+((r*40)+24),8,$0E
-  next r
-
-  ' Score table
-  textat 26,2,"lives:    "
-  textat 26,4,"score:    "
-
-  
-endproc
-
-proc _sfx_bounce
-
-  memset 54272,24,0
-  poke 54296,15
-  poke 54277,190
-  poke 54278,248
-  poke 54276,129
-  
-  for _b = 1 to 400
-    poke 54296,15
-    poke 54273,17
-    poke 54272,37
-    poke 54276,17
-  next _b
-  poke 54276,16
-  
-  inc count_bounce
-  if count_bounce < 10 then speed = 1
-  if count_bounce >= 10 then speed = 2
-  if count_bounce >= 20 then speed = 4
-  if count_bounce >= 30 then speed = 6
-  if count_bounce >= 40 then speed = 8
-  if count_bounce >= 50 then speed = 10
-  if count_bounce >= 60 then speed = 12
-  if count_bounce >= 70 then speed = 14
-
-  
-endproc
-
-
-proc _sfx_oops
-
-  memset 54272,24,0
-  
-
-  for _b = 1 to 8000
-    poke 54296,15
-    poke 54273,17
-    poke 54272,37
-    poke 54276,128
-
-  poke 54296,15
-  poke 54277,8
-  poke 54276,33
-
-  next _b
-  poke 54276,16
-  
-endproc
-
-
-' Waits for keypress
-proc bounce_loop
-
-  let key = 0
-  
-  ' Waits for escape key or no lives
-  while key <> 3 and \lives > 0 
-  
-     ' Wait virtical blank
-    watch RASTER_LINE, 250
-    
-    enableirq
-    let key = inkey()
-    disableirq
-    
-    if key = 73 and y >= 42 then y = y - 8
-    if key = 74 and x >= 32 then x = x - 8
-    if key = 75 and y <= 220 then y = y + 8
-    if key = 76 and x <= 182 then x = x + 8
-    
-    ' At left or right border?
-    if ball_x = 200 then 
-      call _sfx_bounce
-      let ball_xdir = -1 * speed
-    endif
-    
-    if ball_x = 20 then 
-      call _sfx_bounce
-      let ball_xdir = speed 
-    endif
-    
-    ' At bottom or top?
-    if ball_y = 240 then 
-      let ball_ydir = -1 * speed
-      call _sfx_oops
-      dec \lives
-    endif
-    
-    if ball_y = 44 then 
-      call _sfx_bounce
-      let ball_ydir = speed
-    endif
-    
-    ' Move sprite horizontal
-    let ball_x = ball_x + ball_xdir
-    
-    ' Move sprite vertical
-    let ball_y = ball_y + ball_ydir  
-
-   
-    ' Set sprite locations
-    call spr_setpos(0, ball_x, ball_y)
-    call spr_setpos(1, x, y)
-    
-      
-    ' COLLISIONS??
-    if spr_spr_collision(0) = 1 and ball_ydir = (1 * speed) then 
-      let ball_ydir = -1 * speed
-      call _sfx_bounce
-    endif
-    
-    textat 33,2, \lives
-    textat 33,4, count_bounce
-
-
-  endwhile
-  
-endproc  
-
-while 1=1
-
-  call _title
-  call _init
-
-  call bounce_loop
-  
-endwhile
-
+batsprite:
+DATA AS BYTE _
+0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, _
+0,0,0, 0,0,0, _
+5,85,80, _
+26,170,164, _
+105,85,91, _
+101,85,87, _
+85,85,87, _
+101,221,223, _
+87,119,127, _
+63,255,252, _
+15,255,240, _
+0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, _
+0   : REM final padding byte so total = 64
