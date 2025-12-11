@@ -6,6 +6,8 @@ CONST D = 64260 ' scan code
 CONST ESC = 32640 ' scan code
 DIM a$ AS STRING * 1
 DIM x,y AS BYTE FAST
+DIM ballx,bally AS BYTE FAST
+DIM xdir,ydir AS INT FAST
 
 SUB curpos(row AS BYTE, col AS BYTE) STATIC
   POKE 214, row: POKE 211, col: SYS 58732
@@ -44,6 +46,10 @@ POKE 2041, (SHAPES_START+64)/64   : REM = 193
 
 x=100
 y=110
+ballx=120
+bally=120
+xdir=-1
+ydir=-1
 SPRITE 1 ON AT x,y
 SPRITE 0 ON AT 120,120
 
@@ -58,7 +64,14 @@ DO WHILE NOT KEY(ESC)
 
   WAIT 53265, 128
   SPRITE 1 AT x,y
-  SPRITE 0 AT 120,120
+  SPRITE 0 AT ballx,bally
+
+  IF ballx=240 THEN xdir=-xdir
+  IF ballx=0 THEN xdir=-xdir
+  IF bally=240 THEN ydir=-ydir
+  IF bally=40 THEN ydir=-ydir
+  ballx=ballx+xdir
+  bally=bally+ydir
 
 LOOP
 END
